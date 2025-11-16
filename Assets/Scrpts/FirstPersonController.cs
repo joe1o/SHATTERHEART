@@ -5,10 +5,12 @@ public class FirstPersonController : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 12f;
-    public float sprintMultiplier = 1.5f;
+    public float waterSpeedMultiplier = 1.5f;
     public float airControl = 0.8f;
     public float groundDrag = 8f;
     public float airDrag = 2f;
+    
+    private bool isInWater = false;
     
     [Header("Jumping")]
     public float jumpForce = 15f;
@@ -120,11 +122,11 @@ public class FirstPersonController : MonoBehaviour
         Vector3 inputDir = transform.right * horizontal + transform.forward * vertical;
         inputDir = inputDir.normalized;
         
-        // Sprint
+        // Apply water speed multiplier only when grounded and in water
         float currentSpeed = moveSpeed;
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (isInWater && isGrounded)
         {
-            currentSpeed *= sprintMultiplier;
+            currentSpeed *= waterSpeedMultiplier;
         }
         
         if (isGrounded)
@@ -185,5 +187,18 @@ public class FirstPersonController : MonoBehaviour
     public float GetHorizontalSpeed()
     {
         return new Vector3(velocity.x, 0, velocity.z).magnitude;
+    }
+    
+    // Detect water collision - CharacterController uses OnControllerColliderHit
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (hit.collider.CompareTag("water"))
+        {
+            isInWater = true;
+        }
+        else
+        {
+            isInWater = false;
+        }
     }
 }
