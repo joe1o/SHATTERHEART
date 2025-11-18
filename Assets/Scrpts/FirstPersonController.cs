@@ -37,10 +37,13 @@ public class FirstPersonController : MonoBehaviour
     private bool isGrounded;
     private float lastGroundedTime;
     private float lastJumpPressTime;
+
+    [SerializeField]private Animator anim;
     
     void Start()
     {
         controller = GetComponent<CharacterController>();
+       
         
         // Lock and hide cursor
         Cursor.lockState = CursorLockMode.Locked;
@@ -59,11 +62,30 @@ public class FirstPersonController : MonoBehaviour
         HandleJump();
         HandleMovement();
         ApplyGravity();
+        HandleAnimations();
         
         // Move the character
         controller.Move(velocity * Time.deltaTime);
     }
     
+    bool isMoving()
+    {
+        return controller.velocity.magnitude > 0.1f;
+
+    }
+
+    void HandleAnimations()
+    {
+        if(isMoving())
+        {
+            anim.SetBool("running", true);
+        }
+        else
+        {
+            anim.SetBool("running", false);
+        }
+    }
+
     void HandleMouseLook()
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
