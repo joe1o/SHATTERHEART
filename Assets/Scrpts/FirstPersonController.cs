@@ -85,6 +85,10 @@ public class FirstPersonController : MonoBehaviour
             anim.SetBool("running", false);
         }
     }
+    public void Bounce(float bounceStrength)
+    {
+        velocity.y = bounceStrength;
+    }
 
     void HandleMouseLook()
     {
