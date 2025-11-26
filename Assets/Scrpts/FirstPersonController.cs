@@ -54,6 +54,7 @@ public class FirstPersonController : MonoBehaviour
     private float lastJumpPressTime;
     private float nextFootstepTime;
     private AudioSource audioSource;
+    private bool movementPaused = false;
 
     [SerializeField]private Animator anim;
     
@@ -174,6 +175,9 @@ public class FirstPersonController : MonoBehaviour
     
     void HandleMovement()
     {
+        // Skip movement when paused (during dash, etc.)
+        if (movementPaused) return;
+        
         // Get input
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
@@ -235,6 +239,25 @@ public class FirstPersonController : MonoBehaviour
     public void AddForce(Vector3 force)
     {
         velocity += force;
+    }
+    
+    // Set vertical velocity directly (doesn't stack)
+    public void SetVerticalVelocity(float yVelocity)
+    {
+        velocity.y = yVelocity;
+    }
+    
+    // Pause/unpause movement (for abilities like dash)
+    public void PauseMovement(bool pause)
+    {
+        movementPaused = pause;
+        if (pause)
+        {
+            // Reset horizontal velocity when pausing
+            velocity.x = 0;
+            velocity.z = 0;
+            moveDirection = Vector3.zero;
+        }
     }
     
     // Public method to check if player is grounded (for abilities)

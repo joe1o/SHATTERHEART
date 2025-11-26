@@ -65,8 +65,8 @@ public class CharacterSelect : MonoBehaviour
         // Store selected character
         SelectedCharacter.character = (CharacterType)currentIndex;
         
-        // Load game scene
-        SceneManager.LoadScene("lvl1");
+        // Load cutscene (or game scene if no cutscene)
+        SceneManager.LoadScene("Cutscene1");
     }
     
     // Call this from the SELECT button
