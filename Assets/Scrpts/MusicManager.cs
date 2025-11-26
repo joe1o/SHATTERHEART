@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections.Generic;
 
 public class MusicManager : MonoBehaviour
@@ -13,6 +14,8 @@ public class MusicManager : MonoBehaviour
     public bool playOnStart = true;
     public bool shuffle = true;
     public bool loop = true;
+    public bool persistAcrossScenes = false;  // If false, music stops on scene change
+    public bool stopOnSceneChange = true;     // Stop music when scene changes
     
     [Header("Fade Settings")]
     public float fadeInDuration = 1f;
@@ -25,16 +28,41 @@ public class MusicManager : MonoBehaviour
     
     void Awake()
     {
-        // Singleton pattern - persist across scenes
-        if (Instance == null)
+        if (persistAcrossScenes)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            // Singleton pattern - persist across scenes
+            if (Instance == null)
+            {
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+                
+                // Subscribe to scene change event
+                SceneManager.sceneLoaded += OnSceneLoaded;
+            }
+            else
+            {
+                Destroy(gameObject);
+                return;
+            }
         }
         else
         {
-            Destroy(gameObject);
-            return;
+            // Each scene has its own MusicManager
+            Instance = this;
+        }
+    }
+    
+    void OnDestroy()
+    {
+        // Unsubscribe from scene change event
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (stopOnSceneChange && persistAcrossScenes)
+        {
+            Stop();
         }
     }
     

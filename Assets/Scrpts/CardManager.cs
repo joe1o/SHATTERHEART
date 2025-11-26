@@ -50,6 +50,8 @@ public class CardManager : MonoBehaviour
             audioSource.playOnAwake = false;
         }
         
+        // Set default weapon to Katana when no cards
+        ApplyDefaultWeapon();
         UpdateUI();
     }
     
@@ -197,7 +199,13 @@ public class CardManager : MonoBehaviour
     void ApplyCurrentCard()
     {
         Card current = GetCurrentCard();
-        if (current == null) return;
+        
+        // No cards - use default Katana
+        if (current == null)
+        {
+            ApplyDefaultWeapon();
+            return;
+        }
         
         // Apply weapon type to shooting script
         if (shootingScript != null)
@@ -218,6 +226,15 @@ public class CardManager : MonoBehaviour
                     shootingScript.SetWeapon(WeaponType.Katana);
                     break;
             }
+        }
+    }
+    
+    void ApplyDefaultWeapon()
+    {
+        // Default weapon is Katana when no cards are collected
+        if (shootingScript != null)
+        {
+            shootingScript.SetWeapon(WeaponType.Katana);
         }
     }
     
@@ -245,6 +262,11 @@ public class CardManager : MonoBehaviour
             {
                 currentStackIndex = Mathf.Clamp(currentStackIndex, 0, cardStacks.Count - 1);
                 ApplyCurrentCard();
+            }
+            else
+            {
+                // No cards left - use default Katana
+                ApplyDefaultWeapon();
             }
         }
         

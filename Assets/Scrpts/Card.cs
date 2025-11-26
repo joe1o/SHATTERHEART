@@ -57,7 +57,7 @@ public class Card
                 damage = 25f;
                 fireRate = 4f;
                 range = 100f;
-                discardAbility = AbilityType.Dash;
+                discardAbility = AbilityType.Updraft;  // Changed: Updraft
                 break;
                 
             case CardType.WidowMaker:
@@ -67,7 +67,7 @@ public class Card
                 damage = 10f;
                 fireRate = 12f;
                 range = 80f;
-                discardAbility = AbilityType.Updraft;
+                discardAbility = AbilityType.Stomp;    // Changed: Stomp
                 break;
                 
             case CardType.Damnation:
@@ -77,7 +77,7 @@ public class Card
                 damage = 15f;
                 fireRate = 1.2f;
                 range = 30f;
-                discardAbility = AbilityType.Stomp;
+                discardAbility = AbilityType.Dash;     // Changed: Dash
                 break;
                 
             case CardType.Heartbreaker:
