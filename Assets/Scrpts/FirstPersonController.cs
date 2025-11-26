@@ -19,8 +19,22 @@ public class FirstPersonController : MonoBehaviour
     public float jumpBufferTime = 0.2f;
     
     [Header("Ground Check")]
-    public float groundCheckDistance = 0.3f;
+    public float groundCheckDistance = 0.1f;  // Reduced for snappier landing
     public LayerMask groundMask;
+    
+    [Header("Sounds")]
+    public AudioClip[] footstepSounds;
+    public AudioClip[] waterFootstepSounds;
+    public AudioClip landSound;
+    public AudioClip waterLandSound;
+    public float footstepInterval = 0.35f;
+    public float waterFootstepInterval = 0.25f;
+    
+    [Header("Sound Volumes")]
+    [Range(0f, 1f)] public float footstepVolume = 0.5f;
+    [Range(0f, 1f)] public float waterFootstepVolume = 0.6f;
+    [Range(0f, 1f)] public float landVolume = 0.5f;
+    [Range(0f, 1f)] public float waterLandVolume = 0.7f;
     
     [Header("Camera")]
     public Transform cameraTransform;
@@ -35,15 +49,25 @@ public class FirstPersonController : MonoBehaviour
     private float xRotation = 0f;
     
     private bool isGrounded;
+    private bool wasGrounded;
     private float lastGroundedTime;
     private float lastJumpPressTime;
+    private float nextFootstepTime;
+    private AudioSource audioSource;
 
     [SerializeField]private Animator anim;
     
     void Start()
     {
         controller = GetComponent<CharacterController>();
-       
+        
+        // Setup audio
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+        }
         
         // Lock and hide cursor
         Cursor.lockState = CursorLockMode.Locked;
@@ -53,19 +77,26 @@ public class FirstPersonController : MonoBehaviour
         {
             Debug.LogError("Camera Transform not assigned!");
         }
+        
+        wasGrounded = true;
     }
     
     void Update()
     {
         HandleMouseLook();
         HandleGroundCheck();
+        CheckWaterStatus();
         HandleJump();
         HandleMovement();
         ApplyGravity();
         HandleAnimations();
+        HandleFootsteps();
+        HandleLanding();
         
         // Move the character
         controller.Move(velocity * Time.deltaTime);
+        
+        wasGrounded = isGrounded;
     }
     
     bool isMoving()
@@ -106,12 +137,15 @@ public class FirstPersonController : MonoBehaviour
     
     void HandleGroundCheck()
     {
-        // Spherecast for better ground detection
+        // Tighter ground check for snappier landing
         isGrounded = Physics.CheckSphere(
             transform.position - new Vector3(0, controller.height / 2, 0), 
-            controller.radius + groundCheckDistance, 
+            groundCheckDistance, 
             groundMask
         );
+        
+        // Also use CharacterController's built-in ground check
+        isGrounded = isGrounded || controller.isGrounded;
         
         if (isGrounded)
         {
@@ -215,16 +249,78 @@ public class FirstPersonController : MonoBehaviour
         return new Vector3(velocity.x, 0, velocity.z).magnitude;
     }
     
-    // Detect water collision - CharacterController uses OnControllerColliderHit
-    void OnControllerColliderHit(ControllerColliderHit hit)
+    void CheckWaterStatus()
     {
-        if (hit.collider.CompareTag("water"))
+        // Reset water status when in air
+        if (!isGrounded)
         {
-            isInWater = true;
+            isInWater = false;
+            return;
+        }
+        
+        // Raycast down to check what surface we're standing on
+        RaycastHit hit;
+        Vector3 rayOrigin = transform.position;
+        
+        if (Physics.Raycast(rayOrigin, Vector3.down, out hit, controller.height))
+        {
+            isInWater = hit.collider.CompareTag("water");
         }
         else
         {
             isInWater = false;
+        }
+    }
+    
+    // Check if player is in water
+    public bool IsInWater()
+    {
+        return isInWater;
+    }
+    
+    void HandleFootsteps()
+    {
+        // Only play footsteps when grounded and moving
+        if (!isGrounded) return;
+        
+        float speed = GetHorizontalSpeed();
+        if (speed < 0.5f) return;
+        
+        float interval = isInWater ? waterFootstepInterval : footstepInterval;
+        
+        if (Time.time >= nextFootstepTime)
+        {
+            nextFootstepTime = Time.time + interval;
+            PlayFootstep();
+        }
+    }
+    
+    void PlayFootstep()
+    {
+        AudioClip[] clips = isInWater ? waterFootstepSounds : footstepSounds;
+        float volume = isInWater ? waterFootstepVolume : footstepVolume;
+        
+        if (clips == null || clips.Length == 0) return;
+        
+        AudioClip clip = clips[Random.Range(0, clips.Length)];
+        if (clip != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(clip, volume);
+        }
+    }
+    
+    void HandleLanding()
+    {
+        // Play land sound when hitting ground
+        if (isGrounded && !wasGrounded)
+        {
+            AudioClip clipToPlay = isInWater ? waterLandSound : landSound;
+            float volume = isInWater ? waterLandVolume : landVolume;
+            
+            if (clipToPlay != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(clipToPlay, volume);
+            }
         }
     }
 }

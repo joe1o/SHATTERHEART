@@ -23,6 +23,7 @@ public class Shooting : MonoBehaviour
     public float pistolRange = 100f;
     public float pistolFireRate = 4f;        // Shots per second
     public AudioClip pistolSound;
+    [Range(0f, 1f)] public float pistolVolume = 0.7f;
     
     [Header("Machine Gun Settings")]
     public float mgDamage = 10f;
@@ -30,6 +31,7 @@ public class Shooting : MonoBehaviour
     public float mgFireRate = 12f;           // Shots per second
     public float mgSpread = 3f;              // Spread angle
     public AudioClip mgSound;
+    [Range(0f, 1f)] public float mgVolume = 0.5f;
     
     [Header("Shotgun Settings")]
     public float shotgunDamage = 15f;        // Per pellet
@@ -38,6 +40,7 @@ public class Shooting : MonoBehaviour
     public int shotgunPellets = 8;
     public float shotgunSpread = 10f;
     public AudioClip shotgunSound;
+    [Range(0f, 1f)] public float shotgunVolume = 0.8f;
     
     [Header("Katana Settings")]
     public float katanaDamage = 50f;
@@ -45,6 +48,7 @@ public class Shooting : MonoBehaviour
     public float katanaFireRate = 2f;        // Slashes per second
     public float katanaArc = 60f;            // Slash arc angle
     public AudioClip katanaSound;
+    [Range(0f, 1f)] public float katanaVolume = 0.6f;
     
     [Header("Effects")]
     public GameObject hitEffectPrefab;
@@ -134,7 +138,7 @@ public class Shooting : MonoBehaviour
         
         ShootRay(origin, direction, pistolRange, pistolDamage);
         
-        PlaySound(pistolSound);
+        PlaySound(pistolSound, pistolVolume);
         ApplyRecoil(0.05f);
     }
     
@@ -148,7 +152,7 @@ public class Shooting : MonoBehaviour
         
         ShootRay(origin, direction, mgRange, mgDamage);
         
-        PlaySound(mgSound);
+        PlaySound(mgSound, mgVolume);
         ApplyRecoil(0.02f);
     }
     
@@ -166,7 +170,7 @@ public class Shooting : MonoBehaviour
             ShootRay(origin, direction, shotgunRange, shotgunDamage);
         }
         
-        PlaySound(shotgunSound);
+        PlaySound(shotgunSound, shotgunVolume);
         ApplyRecoil(0.15f);
     }
     
@@ -209,7 +213,7 @@ public class Shooting : MonoBehaviour
             }
         }
         
-        PlaySound(katanaSound);
+        PlaySound(katanaSound, katanaVolume);
         ApplyRecoil(0.03f);
     }
     
@@ -256,11 +260,11 @@ public class Shooting : MonoBehaviour
         return spreadRotation * direction;
     }
     
-    void PlaySound(AudioClip clip)
+    void PlaySound(AudioClip clip, float volume)
     {
         if (clip != null && audioSource != null)
         {
-            audioSource.PlayOneShot(clip);
+            audioSource.PlayOneShot(clip, volume);
         }
     }
     

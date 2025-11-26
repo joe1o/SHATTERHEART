@@ -5,7 +5,7 @@ public class MenuManager : MonoBehaviour
 {
     public void NewGame()
     {
-        SceneManager.LoadScene("lvl1");
+        SceneManager.LoadScene("CharacterSelect");
     }
     
     public void ExitGame()
