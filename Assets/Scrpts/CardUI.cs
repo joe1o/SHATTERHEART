@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using TMPro;
+using System.Collections;
 
 public class CardUI : MonoBehaviour
 {
@@ -69,7 +70,8 @@ public class CardUI : MonoBehaviour
     private List<CardDisplay> cardDisplays = new List<CardDisplay>();
     private GameObject katanaCard = null;
     private List<GameObject> passiveIcons = new List<GameObject>();
-    
+    private bool isAnimatingSwap = false;
+
     void Start()
     {
         CreateKatanaCard();
@@ -78,6 +80,7 @@ public class CardUI : MonoBehaviour
     
     void Update()
     {
+        if (isAnimatingSwap) return;
         foreach (CardDisplay cd in cardDisplays)
         {
             if (cd.rectTransform != null)
@@ -111,7 +114,152 @@ public class CardUI : MonoBehaviour
             }
         }
     }
-    
+
+    // ====================================
+    // CIRCULAR SLOT SWAP ANIMATION
+    // ====================================
+    public void AnimateCircularSwap(int currentIndex)
+    {
+        StartCoroutine(SwapAnimation(currentIndex));
+    }
+
+    private IEnumerator SwapAnimation(int currentIndex)
+    {
+        if (cardDisplays.Count < 2) yield break;
+
+        isAnimatingSwap = true;
+
+        // Identify current stack & previous stack
+        List<CardDisplay> currentCards = new List<CardDisplay>();
+        List<CardDisplay> otherCards = new List<CardDisplay>();
+
+        foreach (var cd in cardDisplays)
+        {
+            if (cd.isCurrent) currentCards.Add(cd);
+            else otherCards.Add(cd);
+        }
+
+        if (currentCards.Count == 0 || otherCards.Count == 0)
+        {
+            isAnimatingSwap = false;
+            yield break;
+        }
+
+        // Store start/end data for ALL cards in both stacks
+        List<Vector2> currentStartPositions = new List<Vector2>();
+        List<Vector2> currentEndPositions = new List<Vector2>();
+        List<Vector3> currentStartScales = new List<Vector3>();
+        List<Vector3> currentEndScales = new List<Vector3>();
+
+        List<Vector2> otherStartPositions = new List<Vector2>();
+        List<Vector2> otherEndPositions = new List<Vector2>();
+        List<Vector3> otherStartScales = new List<Vector3>();
+        List<Vector3> otherEndScales = new List<Vector3>();
+
+        // Target scales
+        float currentToSecondaryRatio = secondaryCardSize.x / currentCardSize.x;
+        float secondaryToCurrentRatio = currentCardSize.x / secondaryCardSize.x;
+
+        // Capture data for ALL current cards
+        for (int i = 0; i < currentCards.Count; i++)
+        {
+            CardDisplay cd = currentCards[i];
+            currentStartPositions.Add(cd.rectTransform.anchoredPosition);
+            currentStartScales.Add(cd.rectTransform.localScale);
+            
+
+            // Find corresponding target position in otherCards
+            if (i < otherCards.Count)
+            {
+                currentEndPositions.Add(otherCards[i].targetPosition);
+            }
+            else
+            {
+                currentEndPositions.Add(otherCards[0].targetPosition);
+            }
+
+            currentEndScales.Add(cd.rectTransform.localScale * currentToSecondaryRatio);
+        }
+
+        // Capture data for ALL other cards
+        for (int i = 0; i < otherCards.Count; i++)
+        {
+            CardDisplay cd = otherCards[i];
+            otherStartPositions.Add(cd.rectTransform.anchoredPosition);
+            otherStartScales.Add(cd.rectTransform.localScale);
+            
+
+            // Find corresponding target position in currentCards
+            if (i < currentCards.Count)
+            {
+                otherEndPositions.Add(currentCards[i].targetPosition);
+            }
+            else
+            {
+                otherEndPositions.Add(currentCards[0].targetPosition);
+            }
+
+            otherEndScales.Add(cd.rectTransform.localScale * secondaryToCurrentRatio);
+        }
+
+        float duration = 0.2f;
+        float elapsed = 0f;
+        float radius = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+            float easeT = Mathf.SmoothStep(0f, 1f, t);
+
+            float angle = Mathf.Lerp(0f, 180f, t);
+            float rad = angle * Mathf.Deg2Rad;
+
+            float xOffset = Mathf.Cos(rad) * radius;
+            float yOffset = Mathf.Sin(rad) * radius;
+
+            // Animate ALL current cards going to secondary
+            for (int i = 0; i < currentCards.Count; i++)
+            {
+                CardDisplay cd = currentCards[i];
+
+                cd.rectTransform.anchoredPosition =
+                    Vector2.Lerp(currentStartPositions[i], currentEndPositions[i], easeT) +
+                    new Vector2(xOffset, -yOffset);
+
+                cd.rectTransform.localScale = Vector3.Lerp(currentStartScales[i], currentEndScales[i], easeT);
+
+            }
+
+            // Animate ALL other cards coming to current
+            for (int i = 0; i < otherCards.Count; i++)
+            {
+                CardDisplay cd = otherCards[i];
+                bool isTopCard = (i == otherCards.Count - 1);
+
+                cd.rectTransform.anchoredPosition =
+                    Vector2.Lerp(otherStartPositions[i], otherEndPositions[i], easeT) +
+                    new Vector2(xOffset, yOffset);
+
+                cd.rectTransform.localScale = Vector3.Lerp(otherStartScales[i], otherEndScales[i], easeT);
+
+            }
+
+            yield return null;
+        }
+
+        // Force a full rebuild WITHOUT slide-in animation
+        ClearCards();
+        RebuildCards(
+            CardManager.Instance.GetAllStacks(),
+            CardManager.Instance.GetCurrentStackIndex()
+            
+        );
+
+        isAnimatingSwap = false;
+    }
+
+
     void CreateKatanaCard()
     {
         if (katanaSprite == null) return;
@@ -257,8 +405,19 @@ public class CardUI : MonoBehaviour
                 float yPos = currentCardPosition.y + (cardIdx * currentStackOffsetY);
                 
                 cd.targetPosition = new Vector2(xPos, yPos);
-                cd.rectTransform.anchoredPosition = cd.targetPosition + Vector2.right * pickupSlideDistance;
-                
+
+                // Only apply slide-in animation if requested
+                if (isAnimatingSwap == false)
+                {
+                    cd.rectTransform.anchoredPosition = cd.targetPosition + Vector2.right * pickupSlideDistance;
+                }
+                else
+                {
+                    cd.rectTransform.anchoredPosition = cd.targetPosition;
+                }
+
+                //cd.rectTransform.anchoredPosition = cd.targetPosition + Vector2.right * pickupSlideDistance;
+
                 cd.targetScale = Vector3.one;
                 cd.targetRotation = Quaternion.Euler(0, 0, currentCardTilt);
                 cd.targetColor = isTopCard ? currentCardColor : new Color(0.95f, 0.95f, 0.95f, 1f);

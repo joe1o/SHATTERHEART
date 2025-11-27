@@ -172,7 +172,9 @@ public class CardManager : MonoBehaviour
         currentStackIndex = (currentStackIndex + 1) % cardStacks.Count;
         ApplyCurrentCard();
         PlaySound(switchSound);
-        UpdateUI();
+        if (cardUI != null) cardUI.AnimateCircularSwap(currentStackIndex);
+
+      //  UpdateUI();
     }
     
     public void SwitchToPreviousStack()
@@ -182,7 +184,9 @@ public class CardManager : MonoBehaviour
         currentStackIndex = (currentStackIndex - 1 + cardStacks.Count) % cardStacks.Count;
         ApplyCurrentCard();
         PlaySound(switchSound);
-        UpdateUI();
+        if (cardUI != null) cardUI.AnimateCircularSwap(currentStackIndex);
+        
+       // UpdateUI();
     }
     
     public void SwitchToStack(int index)
@@ -193,7 +197,9 @@ public class CardManager : MonoBehaviour
         currentStackIndex = index;
         ApplyCurrentCard();
         PlaySound(switchSound);
-        UpdateUI();
+        if (cardUI != null) cardUI.AnimateCircularSwap(currentStackIndex);
+
+        //UpdateUI();
     }
     
     void ApplyCurrentCard()
@@ -340,7 +346,7 @@ public class CardManager : MonoBehaviour
         return cardStacks[currentStackIndex].Count;
     }
     
-    void UpdateUI()
+    public void UpdateUI()
     {
         if (cardUI != null)
         {
