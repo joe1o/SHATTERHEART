@@ -39,7 +39,11 @@ public class CardUI : MonoBehaviour
     public Vector2 katanaPosition = new Vector2(-50, 50);        // Position from bottom-right
     public float katanaTilt = -5f;
     public Color katanaColor = new Color(0.95f, 0.9f, 0.85f, 1f);
-    
+
+    [Header("Shake Settings")]
+    public float shakeIntensity = 8f;
+    public float shakeDuration = 0.15f;
+
     [Header("Passive Weapon Icons (Far Right)")]
     public Sprite[] passiveWeaponIcons;
     public Vector2 passiveIconSize = new Vector2(45, 45);
@@ -71,6 +75,9 @@ public class CardUI : MonoBehaviour
     private GameObject katanaCard = null;
     private List<GameObject> passiveIcons = new List<GameObject>();
     private bool isAnimatingSwap = false;
+    private bool isShaking = false;
+    private Dictionary<CardDisplay, Vector2> originalPositions = new Dictionary<CardDisplay, Vector2>();
+
 
     void Start()
     {
@@ -113,6 +120,66 @@ public class CardUI : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void ShakeCards()
+    {
+        if (!isShaking)
+        {
+            StartCoroutine(ShakeCardsCoroutine());
+        }
+    }
+
+    private System.Collections.IEnumerator ShakeCardsCoroutine()
+    {
+        isShaking = true;
+
+        // Store original target positions ONLY for current cards
+        originalPositions.Clear();
+        foreach (var cd in cardDisplays)
+        {
+            if (cd.rectTransform != null && cd.isCurrent) // Only shake current cards
+            {
+                originalPositions[cd] = cd.targetPosition;
+            }
+        }
+
+        float elapsed = 0f;
+
+        while (elapsed < shakeDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / shakeDuration;
+
+            // Smooth curve: goes down quickly, comes back up smoothly
+            // Using a bounce-back easing function
+            float curve = Mathf.Sin(t * Mathf.PI); // Creates smooth arc from 0 to 1 back to 0
+
+            // Apply downward offset based on curve
+            Vector2 offset = new Vector2(0, -shakeIntensity * curve);
+
+            foreach (var cd in cardDisplays)
+            {
+                if (cd.rectTransform != null && originalPositions.ContainsKey(cd))
+                {
+                    cd.rectTransform.anchoredPosition = originalPositions[cd] + offset;
+                }
+            }
+
+            yield return null;
+        }
+
+        // Reset to original positions
+        foreach (var cd in cardDisplays)
+        {
+            if (cd.rectTransform != null && originalPositions.ContainsKey(cd))
+            {
+                cd.rectTransform.anchoredPosition = originalPositions[cd];
+            }
+        }
+
+        originalPositions.Clear();
+        isShaking = false;
     }
 
     // ====================================

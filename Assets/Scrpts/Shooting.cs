@@ -111,6 +111,7 @@ public class Shooting : MonoBehaviour
     
     void Fire()
     {
+       
         switch (currentWeapon)
         {
             case WeaponType.Pistol:
@@ -125,6 +126,10 @@ public class Shooting : MonoBehaviour
             case WeaponType.Katana:
                 SlashKatana();
                 break;
+        }
+        if (CardManager.Instance != null && CardManager.Instance.cardUI != null)
+        {
+            CardManager.Instance.cardUI.ShakeCards();
         }
     }
     
