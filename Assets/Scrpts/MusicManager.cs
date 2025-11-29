@@ -14,8 +14,8 @@ public class MusicManager : MonoBehaviour
     public bool playOnStart = true;
     public bool shuffle = true;
     public bool loop = true;
-    public bool persistAcrossScenes = false;  // If false, music stops on scene change
-    public bool stopOnSceneChange = true;     // Stop music when scene changes
+    public bool persistAcrossScenes = false;
+    public bool stopOnSceneChange = true;
     
     [Header("Fade Settings")]
     public float fadeInDuration = 1f;
@@ -25,18 +25,17 @@ public class MusicManager : MonoBehaviour
     private List<int> playlist = new List<int>();
     private int currentTrackIndex = 0;
     private bool isFading = false;
+    private float trackChangeDelay = 0.1f; // Cooldown to prevent double-trigger
+    private float lastTrackChangeTime = 0f;
     
     void Awake()
     {
         if (persistAcrossScenes)
         {
-            // Singleton pattern - persist across scenes
             if (Instance == null)
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
-                
-                // Subscribe to scene change event
                 SceneManager.sceneLoaded += OnSceneLoaded;
             }
             else
@@ -47,14 +46,12 @@ public class MusicManager : MonoBehaviour
         }
         else
         {
-            // Each scene has its own MusicManager
             Instance = this;
         }
     }
     
     void OnDestroy()
     {
-        // Unsubscribe from scene change event
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
     
@@ -88,16 +85,33 @@ public class MusicManager : MonoBehaviour
     
     void Update()
     {
-        // Auto-play next track when current one ends
+        // Auto-play next track when current one ends (with cooldown check)
         if (loop && !audioSource.isPlaying && !isFading && musicTracks.Length > 0)
         {
-            NextTrack();
+            // Only auto-advance if enough time has passed since last track change
+            if (Time.time - lastTrackChangeTime > trackChangeDelay)
+            {
+                NextTrack();
+            }
         }
         
         // Update volume in real-time
         if (!isFading)
         {
             audioSource.volume = musicVolume;
+        }
+
+        // Manual skip with M key
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            if (audioSource.isPlaying)
+            {
+                NextTrack();
+            }
+            else
+            {
+                Resume();
+            }
         }
     }
     
@@ -118,7 +132,6 @@ public class MusicManager : MonoBehaviour
     
     void ShufflePlaylist()
     {
-        // Fisher-Yates shuffle
         for (int i = playlist.Count - 1; i > 0; i--)
         {
             int randomIndex = Random.Range(0, i + 1);
@@ -139,6 +152,7 @@ public class MusicManager : MonoBehaviour
         {
             audioSource.clip = track;
             audioSource.Play();
+            lastTrackChangeTime = Time.time; // Record track change time
         }
     }
     
@@ -146,7 +160,6 @@ public class MusicManager : MonoBehaviour
     {
         currentTrackIndex++;
         
-        // Loop back to start and reshuffle
         if (currentTrackIndex >= playlist.Count)
         {
             currentTrackIndex = 0;
@@ -178,6 +191,7 @@ public class MusicManager : MonoBehaviour
         int randomIndex = Random.Range(0, musicTracks.Length);
         audioSource.clip = musicTracks[randomIndex];
         audioSource.Play();
+        lastTrackChangeTime = Time.time;
     }
     
     public void PlayTrack(int index)
@@ -186,6 +200,7 @@ public class MusicManager : MonoBehaviour
         
         audioSource.clip = musicTracks[index];
         audioSource.Play();
+        lastTrackChangeTime = Time.time;
     }
     
     public void Pause()
@@ -256,7 +271,6 @@ public class MusicManager : MonoBehaviour
         isFading = false;
     }
     
-    // Get current track name
     public string GetCurrentTrackName()
     {
         if (audioSource.clip != null)
@@ -271,4 +285,3 @@ public class MusicManager : MonoBehaviour
         return audioSource.isPlaying;
     }
 }
-
