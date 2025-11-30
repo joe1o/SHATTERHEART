@@ -659,6 +659,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: -945086351348822420}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 90b8f90a7b0829c4db08979546695416,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 840947006771482193}
   m_SourcePrefab: {fileID: 100100000, guid: 90b8f90a7b0829c4db08979546695416, type: 3}
 --- !u!1 &8460708957128769594 stripped
 GameObject:
@@ -727,3 +731,34 @@ CapsuleCollider:
   m_Height: 2.9392357
   m_Direction: 1
   m_Center: {x: 0.08890915, y: -0.8470783, z: -0.20331573}
+--- !u!114 &840947006771482193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8460708957128769594}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf008a9b5bb9c0a4ba67f6c1244f4dbf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fireRate: 1
+  damage: 1
+  range: 50
+  spreadAngle: 0
+  detectionRange: 40
+  fieldOfView: 60
+  bulletPrefab: {fileID: 6549803518122504589, guid: 45a0dcff6cfd75149a7e1a23149ed791,
+    type: 3}
+  bulletParticleEffect: {fileID: 6982263153641847612, guid: 36a3ddd9e9258474aa29a08939eeda45,
+    type: 3}
+  bulletSpeed: 30
+  muzzleFlashPrefab: {fileID: 0}
+  hitEffectPrefab: {fileID: 5238538877814813142, guid: 47096eff328e11a418ace7db2d72aa97,
+    type: 3}
+  shootSound: {fileID: 8300000, guid: 372583190c375ac4f8b2b7da9f35119f, type: 3}
+  shootVolume: 0.189
+  firePoint: {fileID: 0}
+  facePlayer: 1
+  rotationSpeed: 2

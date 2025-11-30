@@ -13,6 +13,11 @@ public class EnemyShooting : MonoBehaviour
     public float detectionRange = 40f;
     public float fieldOfView = 60f;       // Cone of vision
     
+    [Header("Bullet Settings")]
+    public GameObject bulletPrefab; // Bullet GameObject with EnemyBullet component
+    public GameObject bulletParticleEffect; // Particle effect to attach to bullet
+    public float bulletSpeed = 30f;
+    
     [Header("Effects")]
     public GameObject muzzleFlashPrefab;
     public GameObject hitEffectPrefab;
@@ -21,6 +26,9 @@ public class EnemyShooting : MonoBehaviour
     
     [Header("Fire Point")]
     public Transform firePoint;           // Where bullets come from (assign in inspector)
+    
+    [Header("Aim Settings")]
+    public float playerAimHeight = 0.5f;  // How high to aim on player (0 = feet, 1 = head, 0.5 = chest)
     
     [Header("Rotation")]
     public bool facePlayer = true;
@@ -35,20 +43,12 @@ public class EnemyShooting : MonoBehaviour
     
     void Start()
     {
-        // Find player
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        // Find player - try multiple methods
+        FindPlayer();
+        
+        if (playerTarget == null)
         {
-            playerTarget = player.transform;
-        }
-        else
-        {
-            // Try finding by name
-            GameObject playerObj = GameObject.Find("Player");
-            if (playerObj != null)
-            {
-                playerTarget = playerObj.transform;
-            }
+            Debug.LogWarning($"EnemyShooting on {gameObject.name} could not find Player! Make sure Player has 'Player' tag.");
         }
         
         enemyScript = GetComponent<Enemy>();
@@ -76,6 +76,31 @@ public class EnemyShooting : MonoBehaviour
         
         // Set up layers - adjust based on your setup
         obstacleLayer = LayerMask.GetMask("Default"); // Adjust to your obstacle layers
+    }
+    
+    void FindPlayer()
+    {
+        // Try finding by tag first
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            playerTarget = player.transform;
+            return;
+        }
+        
+        // Try finding by name
+        GameObject playerObj = GameObject.Find("Player");
+        if (playerObj != null)
+        {
+            playerTarget = playerObj.transform;
+            return;
+        }
+        
+        // Try finding PlayerHealth singleton
+        if (PlayerHealth.Instance != null)
+        {
+            playerTarget = PlayerHealth.Instance.transform;
+        }
     }
     
     void Update()
@@ -107,15 +132,6 @@ public class EnemyShooting : MonoBehaviour
         }
     }
     
-    void FindPlayer()
-    {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            playerTarget = player.transform;
-        }
-    }
-    
     bool CanSeePlayer()
     {
         if (playerTarget == null) return false;
@@ -127,32 +143,33 @@ public class EnemyShooting : MonoBehaviour
         // Check if in range
         if (distanceToPlayer > detectionRange) return false;
         
-        // Check if in field of view
+        // Check if in field of view (more lenient check - just angle, not strict)
         float angleToPlayer = Vector3.Angle(transform.forward, directionToPlayer.normalized);
         if (angleToPlayer > fieldOfView / 2f) return false;
         
-        // Check line of sight (raycast)
+        // Check line of sight (raycast) - but don't require perfect hit
         RaycastHit hit;
         Vector3 rayStart = firePoint != null ? firePoint.position : transform.position;
-        // Adjust ray start height to be at eye level (adjust Y offset as needed)
-        rayStart.y += 1f; // Assuming enemy is roughly human-sized
+        rayStart.y += 1f; // Eye level
         
         Vector3 playerPosition = playerTarget.position;
-        playerPosition.y += 1f; // Aim at player's center/head
+        playerPosition.y += playerAimHeight; // Aim at specified height on player
         
         Vector3 direction = (playerPosition - rayStart).normalized;
         
-        if (Physics.Raycast(rayStart, direction, out hit, distanceToPlayer))
+        // Use a longer raycast to be more lenient
+        if (Physics.Raycast(rayStart, direction, out hit, distanceToPlayer + 5f))
         {
-            // Check if we hit the player
-            if (hit.collider.CompareTag("Player"))
+            // Check if we hit the player or player's collider
+            if (hit.collider.CompareTag("Player") || hit.collider.transform.root.CompareTag("Player"))
             {
                 return true;
             }
-            // Hit something else (wall/obstacle), can't see player
+            // Hit something else - can't see player directly
             return false;
         }
         
+        // If raycast didn't hit anything, assume we can see player
         return true;
     }
     
@@ -176,15 +193,19 @@ public class EnemyShooting : MonoBehaviour
         if (playerTarget == null) return;
         
         // Calculate direction with spread
-        Vector3 directionToPlayer = (playerTarget.position - firePoint.position);
-        directionToPlayer.y += 1f; // Aim slightly up (at player center)
+        Vector3 rayStart = firePoint != null ? firePoint.position : transform.position;
+        rayStart.y += 1f; // Enemy eye level
         
+        Vector3 playerPosition = playerTarget.position;
+        playerPosition.y += 0.5f; // Aim at player's body/chest (lower than head/camera)
+        
+        Vector3 directionToPlayer = (playerPosition - rayStart);
         Vector3 spreadDirection = ApplySpread(directionToPlayer.normalized, spreadAngle);
         
         // Visual/audio effects
         if (muzzleFlashPrefab != null && firePoint != null)
         {
-            GameObject flash = Instantiate(muzzleFlashPrefab, firePoint.position, firePoint.rotation);
+            GameObject flash = Instantiate(muzzleFlashPrefab, rayStart, Quaternion.LookRotation(spreadDirection));
             Destroy(flash, 0.1f);
         }
         
@@ -193,43 +214,62 @@ public class EnemyShooting : MonoBehaviour
             audioSource.PlayOneShot(shootSound, shootVolume);
         }
         
-        // Raycast to hit player
-        RaycastHit hit;
-        Vector3 rayStart = firePoint != null ? firePoint.position : transform.position;
-        rayStart.y += 1f; // Eye level
-        
-        if (Physics.Raycast(rayStart, spreadDirection, out hit, range))
+        // Spawn visible bullet projectile
+        if (bulletPrefab != null)
         {
-            // Spawn hit effect
-            if (hitEffectPrefab != null)
+            GameObject bullet = Instantiate(bulletPrefab, rayStart, Quaternion.LookRotation(spreadDirection));
+            
+            EnemyBullet bulletScript = bullet.GetComponent<EnemyBullet>();
+            if (bulletScript == null)
             {
-                GameObject effect = Instantiate(hitEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
-                Destroy(effect, 2f);
+                bulletScript = bullet.AddComponent<EnemyBullet>();
             }
             
-            // Deal damage to player
-            if (hit.collider.CompareTag("Player"))
+            // Configure bullet
+            bulletScript.SetDirection(spreadDirection);
+            bulletScript.damage = damage;
+            bulletScript.speed = bulletSpeed;
+            bulletScript.hitEffectPrefab = hitEffectPrefab;
+            bulletScript.SetShooter(transform); // Ignore collisions with the shooter
+            
+            // Attach particle effect to bullet if provided
+            if (bulletParticleEffect != null)
             {
-                PlayerHealth playerHealth = hit.collider.GetComponent<PlayerHealth>();
-                if (playerHealth == null)
+                GameObject particleObj = Instantiate(bulletParticleEffect, bullet.transform);
+                bulletScript.trailEffect = particleObj;
+            }
+        }
+        else
+        {
+            // Fallback: hitscan if no bullet prefab
+            RaycastHit hit;
+            if (Physics.Raycast(rayStart, spreadDirection, out hit, range))
+            {
+                if (hitEffectPrefab != null)
                 {
-                    // Try to find PlayerHealth on parent or anywhere on player
-                    playerHealth = hit.collider.GetComponentInParent<PlayerHealth>();
-                }
-                if (playerHealth == null && PlayerHealth.Instance != null)
-                {
-                    playerHealth = PlayerHealth.Instance;
+                    GameObject effect = Instantiate(hitEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                    Destroy(effect, 2f);
                 }
                 
-                if (playerHealth != null)
+                if (hit.collider.CompareTag("Player") || hit.collider.transform.root.CompareTag("Player"))
                 {
-                    playerHealth.TakeDamage(damage);
+                    PlayerHealth playerHealth = hit.collider.GetComponent<PlayerHealth>();
+                    if (playerHealth == null)
+                    {
+                        playerHealth = hit.collider.GetComponentInParent<PlayerHealth>();
+                    }
+                    if (playerHealth == null && PlayerHealth.Instance != null)
+                    {
+                        playerHealth = PlayerHealth.Instance;
+                    }
+                    
+                    if (playerHealth != null)
+                    {
+                        playerHealth.TakeDamage(damage);
+                    }
                 }
             }
         }
-        
-        // Debug visualization (remove in production)
-        Debug.DrawRay(rayStart, spreadDirection * range, Color.red, 0.2f);
     }
     
     Vector3 ApplySpread(Vector3 direction, float spreadAngle)

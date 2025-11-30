@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -10,7 +11,6 @@ public class PlayerHealth : MonoBehaviour
     
     [Header("Death Settings")]
     public float respawnDelay = 2f;
-    public string respawnSceneName = "lvl1"; // Or use current scene
     
     [Header("Effects")]
     public GameObject hitEffectPrefab;
@@ -23,7 +23,6 @@ public class PlayerHealth : MonoBehaviour
     
     private AudioSource audioSource;
     private bool isDead = false;
-    private Vector3 respawnPosition;
     
     void Awake()
     {
@@ -40,9 +39,6 @@ public class PlayerHealth : MonoBehaviour
     void Start()
     {
         currentHearts = maxHearts;
-        
-        // Store spawn position for respawn
-        respawnPosition = transform.position;
         
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
@@ -115,38 +111,14 @@ public class PlayerHealth : MonoBehaviour
             shooting.enabled = false;
         }
         
-        // Respawn after delay
-        Invoke(nameof(Respawn), respawnDelay);
+        // Reload current scene after delay
+        Invoke(nameof(ReloadScene), respawnDelay);
     }
     
-    void Respawn()
+    void ReloadScene()
     {
-        // Reset health
-        currentHearts = maxHearts;
-        isDead = false;
-        
-        // Reset position
-        transform.position = respawnPosition;
-        
-        // Re-enable controls
-        FirstPersonController controller = GetComponent<FirstPersonController>();
-        if (controller != null)
-        {
-            controller.PauseMovement(false);
-        }
-        
-        // Re-enable shooting
-        Shooting shooting = GetComponent<Shooting>();
-        if (shooting != null)
-        {
-            shooting.enabled = true;
-        }
-        
-        // Update UI
-        UpdateUI();
-        
-        // Or reload scene instead:
-        // UnityEngine.SceneManagement.SceneManager.LoadScene(respawnSceneName);
+        // Reload the current scene
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     
     void UpdateUI()
