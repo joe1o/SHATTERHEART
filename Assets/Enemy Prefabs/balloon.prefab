@@ -378,6 +378,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: balloon
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 032761d2436d60840af301382c4fc81b,
+        type: 3}
+      propertyPath: m_TagString
+      value: Baloon
+      objectReference: {fileID: 0}
     - target: {fileID: 1194518412742020102, guid: 032761d2436d60840af301382c4fc81b,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -652,3 +657,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bounceStrength: 15
   popVFX: {fileID: 0}
+  popSound: {fileID: 8300000, guid: 3328b2396caea554c9146e3ffd4fcccd, type: 3}
+  Volume: 0.145

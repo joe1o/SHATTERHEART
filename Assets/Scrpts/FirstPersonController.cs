@@ -1,8 +1,10 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CharacterController))]
 public class FirstPersonController : MonoBehaviour
 {
+    private PlayerAbilities abilities;
     [Header("Movement")]
     public float moveSpeed = 12f;
     public float waterSpeedMultiplier = 1.5f;
@@ -81,6 +83,11 @@ public class FirstPersonController : MonoBehaviour
         
         wasGrounded = true;
     }
+
+    //public void SetVerticalVelocity(float v)
+    //{
+    //    velocity.y = v;
+    //}
     
     void Update()
     {
@@ -98,9 +105,16 @@ public class FirstPersonController : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
         
         wasGrounded = isGrounded;
+
+        //reset level
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
     
-    bool isMoving()
+    
+    public bool isMoving()
     {
         return controller.velocity.magnitude > 0.1f;
 
@@ -173,6 +187,10 @@ public class FirstPersonController : MonoBehaviour
         }
     }
     
+    public float getSpeed()
+    {
+        return moveSpeed;
+    }
     void HandleMovement()
     {
         // Skip movement when paused (during dash, etc.)
@@ -231,7 +249,9 @@ public class FirstPersonController : MonoBehaviour
         }
         else
         {
+            
             velocity.y -= gravity * Time.deltaTime;
+            
         }
     }
     

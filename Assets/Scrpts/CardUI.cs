@@ -58,7 +58,9 @@ public class CardUI : MonoBehaviour
     [Header("Animation Settings")]
     public float animationSpeed = 12f;
     public float pickupSlideDistance = 200f;
-    
+    [Header("Discard Animation")]
+    public float discardAnimationDuration = 0.6f;
+
     private class CardDisplay
     {
         public GameObject gameObject;
@@ -417,7 +419,7 @@ public class CardUI : MonoBehaviour
         }
     }
     
-    void RebuildCards(List<List<Card>> stacks, int currentStackIndex)
+    public void RebuildCards(List<List<Card>> stacks, int currentStackIndex)
     {
         ClearCards();
         
@@ -640,7 +642,7 @@ public class CardUI : MonoBehaviour
         };
     }
     
-    void ClearCards()
+    public void ClearCards()
     {
         foreach (CardDisplay cd in cardDisplays)
         {
@@ -658,48 +660,132 @@ public class CardUI : MonoBehaviour
             newest.rectTransform.anchoredPosition = newest.targetPosition + Vector2.right * pickupSlideDistance;
         }
     }
-    
     public void AnimateDiscard()
     {
-        // Find current top card and animate it
+        // Find the current top card and animate it
+        CardDisplay topCard = null;
+
         foreach (var cd in cardDisplays)
         {
             if (cd.isCurrent)
             {
-                StartCoroutine(DiscardAnimation(cd));
-                break;
+                topCard = cd;
+                // Don't break - we want the last one (top of stack)
             }
         }
+
+        if (topCard != null)
+        {
+            StartCoroutine(DiscardAnimation(topCard));
+        }
     }
-    
+
     System.Collections.IEnumerator DiscardAnimation(CardDisplay cd)
     {
         if (cd.rectTransform == null) yield break;
-        
+
+        // Remove from the active list so Update() doesn't affect it
+        cardDisplays.Remove(cd);
+
         float elapsed = 0f;
-        float duration = 0.2f;
+
         Vector2 startPos = cd.rectTransform.anchoredPosition;
-        Vector2 endPos = startPos + new Vector2(300f, 80f);
+        Vector2 endPos = startPos + new Vector2(0f, 200f); // Move UP
+
         Vector3 startScale = cd.rectTransform.localScale;
+        Vector3 endScale = startScale * 1.2f; // Slightly bigger as it goes up
+
+        Quaternion startRotation = cd.rectTransform.localRotation;
+        float randomRotation = Random.Range(-15f, 15f); // Random slight rotation
+
         Color startColor = cd.image != null ? cd.image.color : Color.white;
-        
-        while (elapsed < duration)
+
+        while (elapsed < discardAnimationDuration)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            
-            cd.rectTransform.anchoredPosition = Vector2.Lerp(startPos, endPos, t * t);
-            cd.rectTransform.localScale = Vector3.Lerp(startScale, Vector3.zero, t);
-            cd.rectTransform.localRotation *= Quaternion.Euler(0, 0, Time.deltaTime * 720f);
-            
+            float t = elapsed / discardAnimationDuration;
+
+            // Smooth easing
+            float easeT = Mathf.SmoothStep(0f, 1f, t);
+
+            // Move upward
+            cd.rectTransform.anchoredPosition = Vector2.Lerp(startPos, endPos, easeT);
+
+            // Scale up slightly
+            cd.rectTransform.localScale = Vector3.Lerp(startScale, endScale, easeT);
+
+            // Slight rotation
+            cd.rectTransform.localRotation = Quaternion.Lerp(
+                startRotation,
+                startRotation * Quaternion.Euler(0, 0, randomRotation),
+                easeT
+            );
+
+            // Fade out
             if (cd.image != null)
             {
                 Color c = startColor;
-                c.a = 1f - t;
+                c.a = Mathf.Lerp(1f, 0f, easeT);
                 cd.image.color = c;
             }
-            
+
             yield return null;
         }
+
+        // Animation complete - destroy the card
+        if (cd.gameObject != null)
+        {
+            Destroy(cd.gameObject);
+        }
     }
+
+    // Call this from CardManager to get the animation duration
+    public float GetDiscardAnimationDuration()
+    {
+        return discardAnimationDuration;
+    }
+
+    //    public void AnimateDiscard()
+    //    {
+    //        // Find current top card and animate it
+    //        foreach (var cd in cardDisplays)
+    //        {
+    //            if (cd.isCurrent)
+    //            {
+    //                StartCoroutine(DiscardAnimation(cd));
+    //                break;
+    //            }
+    //        }
+    //    }
+
+    //    System.Collections.IEnumerator DiscardAnimation(CardDisplay cd)
+    //    {
+    //        if (cd.rectTransform == null) yield break;
+
+    //        float elapsed = 0f;
+    //        float duration = 0.2f;
+    //        Vector2 startPos = cd.rectTransform.anchoredPosition;
+    //        Vector2 endPos = startPos + new Vector2(300f, 80f);
+    //        Vector3 startScale = cd.rectTransform.localScale;
+    //        Color startColor = cd.image != null ? cd.image.color : Color.white;
+
+    //        while (elapsed < duration)
+    //        {
+    //            elapsed += Time.deltaTime;
+    //            float t = elapsed / duration;
+
+    //            cd.rectTransform.anchoredPosition = Vector2.Lerp(startPos, endPos, t * t);
+    //            cd.rectTransform.localScale = Vector3.Lerp(startScale, Vector3.zero, t);
+    //            cd.rectTransform.localRotation *= Quaternion.Euler(0, 0, Time.deltaTime * 720f);
+
+    //            if (cd.image != null)
+    //            {
+    //                Color c = startColor;
+    //                c.a = 1f - t;
+    //                cd.image.color = c;
+    //            }
+
+    //            yield return null;
+    //        }
+    //    }
 }

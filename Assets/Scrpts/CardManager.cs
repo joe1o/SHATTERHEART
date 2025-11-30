@@ -250,36 +250,98 @@ public class CardManager : MonoBehaviour
         
         Card current = GetCurrentCard();
         if (current == null) return;
-        
+
+        // Trigger the discard animation FIRST
+        if (cardUI != null)
+        {
+            cardUI.AnimateDiscard();
+        }
+
         // Use the ability
+        // Use the ability immediately
         UseDiscardAbility(current.discardAbility);
+
+        PlaySound(discardSound);
+
+        // Wait for animation to complete before updating data
+        StartCoroutine(DelayedCardRemoval());
+
+
+
+        //UseDiscardAbility(current.discardAbility);
         
-        // Remove the card
+        //// Remove the card
+        //List<Card> currentStack = cardStacks[currentStackIndex];
+        //currentStack.RemoveAt(currentStack.Count - 1);
+        
+        //// Remove empty stack
+        //if (currentStack.Count == 0)
+        //{
+        //    cardStacks.RemoveAt(currentStackIndex);
+            
+        //    // Adjust current index
+        //    if (cardStacks.Count > 0)
+        //    {
+        //        currentStackIndex = Mathf.Clamp(currentStackIndex, 0, cardStacks.Count - 1);
+        //        ApplyCurrentCard();
+        //    }
+        //    else
+        //    {
+        //        // No cards left - use default Katana
+        //        ApplyDefaultWeapon();
+        //    }
+        //}
+        
+        //PlaySound(discardSound);
+        //UpdateUI();
+    }
+
+    System.Collections.IEnumerator DelayedCardRemoval()
+    {
+        // Wait for animation to finish
+        float animDuration = cardUI != null ? cardUI.GetDiscardAnimationDuration() : 0.6f;
+        yield return new WaitForSeconds(animDuration);
+
+        // NOW remove the card from data
+        if (cardStacks.Count == 0) yield break;
+
         List<Card> currentStack = cardStacks[currentStackIndex];
+        if (currentStack.Count == 0) yield break;
+
         currentStack.RemoveAt(currentStack.Count - 1);
-        
+
         // Remove empty stack
         if (currentStack.Count == 0)
         {
             cardStacks.RemoveAt(currentStackIndex);
-            
+
             // Adjust current index
             if (cardStacks.Count > 0)
             {
                 currentStackIndex = Mathf.Clamp(currentStackIndex, 0, cardStacks.Count - 1);
                 ApplyCurrentCard();
+
+                // Force rebuild the UI so secondary card scales up to primary size
+                if (cardUI != null)
+                {
+                    cardUI.ClearCards();
+                    cardUI.RebuildCards(cardStacks, currentStackIndex);
+                }
             }
             else
             {
                 // No cards left - use default Katana
                 ApplyDefaultWeapon();
+                UpdateUI();
             }
         }
-        
-        PlaySound(discardSound);
-        UpdateUI();
+        else
+        {
+            // Still cards in current stack, just update normally
+            UpdateUI();
+        }
     }
-    
+
     void UseDiscardAbility(AbilityType ability)
     {
         if (playerAbilities == null) return;

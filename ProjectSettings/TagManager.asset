@@ -6,6 +6,7 @@ TagManager:
   tags:
   - water
   - enemy
+  - Baloon
   layers:
   - Default
   - TransparentFX

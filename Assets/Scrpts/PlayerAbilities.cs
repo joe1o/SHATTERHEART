@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Rendering;
 
 public class PlayerAbilities : MonoBehaviour
 {
@@ -32,7 +33,11 @@ public class PlayerAbilities : MonoBehaviour
     public GameObject stompImpactEffect;
     public AudioClip stompSound;
     [Range(0f, 1f)] public float stompVolume = 0.8f;
-    
+
+    [Header("Baloon Settings")]
+    [Range(0f, 1f)] public float BaloonVolume = 0.6f;
+    public AudioClip BaloonSound;
+
     [Header("Input Keys")]
     public KeyCode dashKey = KeyCode.LeftShift;
     public KeyCode updraftKey = KeyCode.E;
@@ -48,7 +53,7 @@ public class PlayerAbilities : MonoBehaviour
     private AudioSource audioSource;
     private Vector3 dashDirection;
     private float dashTimeRemaining;
-    
+    public SpeedLinesEffect speedLinesEffect;
     void Start()
     {
         if (playerController == null)
@@ -101,14 +106,22 @@ public class PlayerAbilities : MonoBehaviour
             StartStomp();
         }
     }
-    
+
     // ==================== DASH ====================
+
+   
     public void StartDash()
     {
+        
         isDashing = true;
         canDash = false;
         dashTimeRemaining = dashDuration;
-        
+        if (speedLinesEffect != null)
+        {
+            // Debug.Log("AWODKSODJASIODJASIODFSIOPHASUIFHASUIOFHASIFBASIFS");
+            speedLinesEffect.StartEffect();
+        }
+
         // Pause player movement so it doesn't stack
         playerController.PauseMovement(true);
         
@@ -139,6 +152,7 @@ public class PlayerAbilities : MonoBehaviour
     
     void ProcessDash()
     {
+        playerController.SetVerticalVelocity(0f);
         dashTimeRemaining -= Time.deltaTime;
         
         if (dashTimeRemaining <= 0)
@@ -150,7 +164,9 @@ public class PlayerAbilities : MonoBehaviour
         // Calculate dash movement
         float dashSpeed = dashDistance / dashDuration;
         Vector3 dashMove = dashDirection * dashSpeed * Time.deltaTime;
+        //dashMove.y = 0f;
         
+       
         // Move character
         characterController.Move(dashMove);
         
@@ -158,14 +174,20 @@ public class PlayerAbilities : MonoBehaviour
         KillEnemiesInRadius(transform.position, dashDamageRadius);
     }
     
-    void EndDash()
+    public void EndDash()
     {
+        //playerController.SetVerticalVelocity(0f);
+        if (speedLinesEffect != null)
+        {
+            speedLinesEffect.StopEffect();
+        }
         isDashing = false;
         
         // Resume player movement
         playerController.PauseMovement(false);
         
         StartCoroutine(DashCooldownRoutine());
+        
     }
     
     IEnumerator DashCooldownRoutine()
@@ -270,7 +292,16 @@ public class PlayerAbilities : MonoBehaviour
             }
         }
     }
-    
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Baloon"))
+        {
+            PlaySound(BaloonSound, BaloonVolume);
+
+        }
+    }
+
     void PlaySound(AudioClip clip, float volume)
     {
         if (clip != null && audioSource != null)
@@ -278,8 +309,13 @@ public class PlayerAbilities : MonoBehaviour
             audioSource.PlayOneShot(clip, volume);
         }
     }
-    
+
     // ==================== PUBLIC METHODS ====================
+    public void setDashing(bool flag)
+    {
+        isDashing = flag;
+
+    }
     public bool IsDashing() => isDashing;
     public bool IsStomping() => isStomping;
     
