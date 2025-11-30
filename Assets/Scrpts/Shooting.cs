@@ -91,6 +91,12 @@ public class Shooting : MonoBehaviour
     {
         if (Time.time < nextFireTime) return;
         
+        // Check if we have ammo (Katana is unlimited)
+        if (currentWeapon != WeaponType.Katana && !HasAmmo())
+        {
+            return; // Can't fire without ammo
+        }
+        
         bool shouldFire = false;
         
         // Machine gun is full auto, others are semi-auto
@@ -107,6 +113,17 @@ public class Shooting : MonoBehaviour
         {
             Fire();
         }
+    }
+    
+    bool HasAmmo()
+    {
+        // Check if current card has ammo
+        if (CardManager.Instance == null) return false;
+        
+        Card currentCard = CardManager.Instance.GetCurrentCard();
+        if (currentCard == null) return false;
+        
+        return currentCard.ammo > 0;
     }
     
     void Fire()
@@ -136,6 +153,12 @@ public class Shooting : MonoBehaviour
     // ==================== PISTOL ====================
     void FirePistol()
     {
+        // Consume ammo
+        if (CardManager.Instance != null)
+        {
+            CardManager.Instance.UseAmmo();
+        }
+        
         nextFireTime = Time.time + (1f / pistolFireRate);
         
         Vector3 origin = playerCamera.transform.position;
@@ -150,6 +173,12 @@ public class Shooting : MonoBehaviour
     // ==================== MACHINE GUN ====================
     void FireMachineGun()
     {
+        // Consume ammo
+        if (CardManager.Instance != null)
+        {
+            CardManager.Instance.UseAmmo();
+        }
+        
         nextFireTime = Time.time + (1f / mgFireRate);
         
         Vector3 origin = playerCamera.transform.position;
@@ -164,6 +193,12 @@ public class Shooting : MonoBehaviour
     // ==================== SHOTGUN ====================
     void FireShotgun()
     {
+        // Consume ammo
+        if (CardManager.Instance != null)
+        {
+            CardManager.Instance.UseAmmo();
+        }
+        
         nextFireTime = Time.time + (1f / shotgunFireRate);
         
         Vector3 origin = playerCamera.transform.position;
@@ -246,7 +281,7 @@ public class Shooting : MonoBehaviour
         }
         
         // Deal damage to enemies
-        if (hit.collider.CompareTag("enemy"))
+        if (hit.collider.CompareTag("enemy") || hit.collider.CompareTag("Baloon") )
         {
             Enemy enemy = hit.collider.GetComponent<Enemy>();
             if (enemy != null)

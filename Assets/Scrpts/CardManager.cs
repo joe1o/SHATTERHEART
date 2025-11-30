@@ -174,7 +174,7 @@ public class CardManager : MonoBehaviour
         PlaySound(switchSound);
         if (cardUI != null) cardUI.AnimateCircularSwap(currentStackIndex);
 
-      //  UpdateUI();
+        UpdateUI(); // Update ammo display immediately when switching
     }
     
     public void SwitchToPreviousStack()
@@ -186,7 +186,7 @@ public class CardManager : MonoBehaviour
         PlaySound(switchSound);
         if (cardUI != null) cardUI.AnimateCircularSwap(currentStackIndex);
         
-       // UpdateUI();
+        UpdateUI(); // Update ammo display immediately when switching
     }
     
     public void SwitchToStack(int index)
@@ -199,7 +199,7 @@ public class CardManager : MonoBehaviour
         PlaySound(switchSound);
         if (cardUI != null) cardUI.AnimateCircularSwap(currentStackIndex);
 
-        //UpdateUI();
+        UpdateUI(); // Update ammo display immediately when switching
     }
     
     void ApplyCurrentCard()
@@ -233,6 +233,12 @@ public class CardManager : MonoBehaviour
                     break;
             }
         }
+        
+        // Update ammo display IMMEDIATELY when switching weapons (before animations)
+        if (cardUI != null)
+        {
+            cardUI.UpdateAmmoDisplay(cardStacks, currentStackIndex);
+        }
     }
     
     void ApplyDefaultWeapon()
@@ -242,9 +248,19 @@ public class CardManager : MonoBehaviour
         {
             shootingScript.SetWeapon(WeaponType.Katana);
         }
+        
+        // Update UI to show Katana info
+        if (cardUI != null && cardUI.ammoText != null)
+        {
+            cardUI.ammoText.text = "∞"; // Infinity symbol for unlimited Katana
+        }
+        if (cardUI != null && cardUI.cardNameText != null)
+        {
+            cardUI.cardNameText.text = "Katana";
+        }
     }
     
-    public void DiscardCurrentCard()
+    public void DiscardCurrentCard(bool useAbility = true)
     {
         if (cardStacks.Count == 0) return;
         
@@ -257,9 +273,11 @@ public class CardManager : MonoBehaviour
             cardUI.AnimateDiscard();
         }
 
-        // Use the ability
-        // Use the ability immediately
-        UseDiscardAbility(current.discardAbility);
+        // Use the ability only if requested (manual discard uses ability, ammo depletion doesn't)
+        if (useAbility)
+        {
+            UseDiscardAbility(current.discardAbility);
+        }
 
         PlaySound(discardSound);
 
@@ -370,10 +388,10 @@ public class CardManager : MonoBehaviour
         
         current.ammo--;
         
-        // Auto-discard when out of ammo
+        // Auto-discard when out of ammo (without using ability)
         if (current.ammo <= 0)
         {
-            DiscardCurrentCard();
+            DiscardCurrentCard(useAbility: false); // Don't use ability when ammo runs out
         }
         else
         {

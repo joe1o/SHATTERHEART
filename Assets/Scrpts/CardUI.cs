@@ -393,8 +393,9 @@ public class CardUI : MonoBehaviour
         if (stacks.Count == 0)
         {
             ClearCards();
-            if (ammoText != null) ammoText.text = "";
-            if (cardNameText != null) cardNameText.text = "";
+            // No cards = default Katana (unlimited ammo)
+            if (ammoText != null) ammoText.text = "∞";
+            if (cardNameText != null) cardNameText.text = "Katana";
             return;
         }
         
@@ -410,11 +411,39 @@ public class CardUI : MonoBehaviour
             UpdateCardPositions(stacks, currentStackIndex);
         }
         
-        // Update ammo
+        // Update ammo display immediately
+        UpdateAmmoDisplay(stacks, currentStackIndex);
+    }
+    
+    // Direct method to update ammo display without waiting for animations
+    public void UpdateAmmoDisplay(List<List<Card>> stacks, int currentStackIndex)
+    {
+        if (stacks.Count == 0)
+        {
+            // No cards = default Katana (unlimited ammo)
+            if (ammoText != null) ammoText.text = "∞";
+            if (cardNameText != null) cardNameText.text = "Katana";
+            return;
+        }
+        
         if (currentStackIndex >= 0 && currentStackIndex < stacks.Count && stacks[currentStackIndex].Count > 0)
         {
             Card currentCard = stacks[currentStackIndex][stacks[currentStackIndex].Count - 1];
-            if (ammoText != null) ammoText.text = currentCard.ammo.ToString();
+            
+            // Show ammo as "current / max" format
+            if (ammoText != null)
+            {
+                // Katana (Heartbreaker) is unlimited, show ∞ or hide
+                if (currentCard.cardType == CardType.Heartbreaker)
+                {
+                    ammoText.text = "∞"; // Infinity symbol for unlimited
+                }
+                else
+                {
+                    ammoText.text = $"{currentCard.ammo} / {currentCard.maxAmmo}";
+                }
+            }
+            
             if (cardNameText != null) cardNameText.text = currentCard.cardName;
         }
     }

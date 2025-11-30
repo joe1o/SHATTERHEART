@@ -449,7 +449,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cb999ae8aa8f344384460893d9f160b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 2
   currentHealth: 0
   deathEffectPrefab: {fileID: 0}
   deathSound: {fileID: 0}

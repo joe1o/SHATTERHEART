@@ -699,7 +699,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cb999ae8aa8f344384460893d9f160b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 3
   currentHealth: 0
   deathEffectPrefab: {fileID: 0}
   deathSound: {fileID: 0}
@@ -723,7 +723,7 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 1
+  m_Radius: 1.0710258
+  m_Height: 2.9392357
   m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0.08890915, y: -0.8470783, z: -0.20331573}
