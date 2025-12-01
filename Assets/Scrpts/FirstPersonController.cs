@@ -208,7 +208,7 @@ public class FirstPersonController : MonoBehaviour
         float currentSpeed = moveSpeed;
         if (isInWater && isGrounded)
         {
-            currentSpeed *= waterSpeedMultiplier;
+            currentSpeed *= waterSpeedMultiplier; 
         }
         
         if (isGrounded)
