@@ -366,4 +366,9 @@ public class FirstPersonController : MonoBehaviour
             }
         }
     }
+    
+    public void SetVelocity(Vector3 newVelocity)
+    {
+        velocity = newVelocity;
+    }
 }

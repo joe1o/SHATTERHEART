@@ -289,6 +289,13 @@ public class Shooting : MonoBehaviour
                 enemy.TakeDamage(damage);
             }
         }
+        
+        // Damage barrels
+        BarrelCollision barrel = hit.collider.GetComponent<BarrelCollision>();
+        if (barrel != null)
+        {
+            barrel.TakeDamage(damage);
+        }
     }
     
     Vector3 ApplySpread(Vector3 direction, float spreadAngle)

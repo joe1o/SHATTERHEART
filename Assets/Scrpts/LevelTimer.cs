@@ -49,13 +49,17 @@ public class LevelTimer : MonoBehaviour
                 PlayerPrefs.SetFloat("Level1_Time", elapsed);
                 PlayerPrefs.Save();
                 Debug.Log($"Level Complete! Time: {elapsed:F2}s");
-                Invoke("RestartScene", 1f);
+                Invoke("LoadLevelComplete", 0.5f);
             }
         }
     }
     
-    void RestartScene()
+    void LoadLevelComplete()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        // Unlock and show cursor
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        
+        SceneManager.LoadScene("LevelComplete");
     }
 }

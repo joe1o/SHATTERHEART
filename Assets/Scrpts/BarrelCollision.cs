@@ -9,7 +9,12 @@ public class BarrelCollision : MonoBehaviour
     public bool destroyBarrelOnHit = true;
     public float destroyDelay = 0f;
     
-    private bool hasExploded = false; // Prevent multiple explosions
+    [Header("Explosion Settings")]
+    public float explosionRadius = 10f;
+    public float explosionForce = 20f;
+    public LayerMask enemyLayer;
+    
+    private bool hasExploded = false;
     
     void OnTriggerEnter(Collider other)
     {
@@ -17,32 +22,65 @@ public class BarrelCollision : MonoBehaviour
         if (other.CompareTag("Player") && !hasExploded)
         {
             hasExploded = true;
+            Explode(other.transform);
+        }
+    }
+    
+    public void TakeDamage(float damage)
+    {
+        if (!hasExploded)
+        {
+            hasExploded = true;
+            Explode(null);
+        }
+    }
+    
+    void Explode(Transform playerTransform)
+    {
+        // Spawn particle effect at barrel position
+        if (explosionPrefab != null)
+        {
+            Vector3 spawnPosition = transform.position;
+            GameObject effect = Instantiate(explosionPrefab, spawnPosition, Quaternion.identity);
             
-            // Spawn particle effect at barrel position
-            if (explosionPrefab != null)
+            ParticleSystem ps = effect.GetComponent<ParticleSystem>();
+            if (ps != null)
             {
-                Vector3 spawnPosition = transform.position;
-                
-                // Instantiate the particle effect
-                GameObject effect = Instantiate(explosionPrefab, spawnPosition, Quaternion.identity);
-                
-                // Destroy the effect after it finishes playing
-                ParticleSystem ps = effect.GetComponent<ParticleSystem>();
-                if (ps != null)
-                {
-                    Destroy(effect, ps.main.duration + ps.main.startLifetime.constantMax);
-                }
-                else
-                {
-                    Destroy(effect, 2f);
-                }
+                Destroy(effect, ps.main.duration + ps.main.startLifetime.constantMax);
             }
-            
-            // Destroy barrel if enabled
-            if (destroyBarrelOnHit)
+            else
             {
-                Destroy(gameObject, destroyDelay);
+                Destroy(effect, 2f);
             }
+        }
+        
+        // Apply knockback to player only if hit by player
+        if (playerTransform != null)
+        {
+            FirstPersonController playerController = playerTransform.GetComponent<FirstPersonController>();
+            if (playerController != null)
+            {
+                Vector3 knockbackDirection = (playerTransform.position - transform.position).normalized;
+                knockbackDirection.y = 1f;
+                playerController.SetVelocity(knockbackDirection * explosionForce);
+            }
+        }
+        
+        // Kill enemies in explosion radius
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, explosionRadius, enemyLayer);
+        foreach (Collider col in hitColliders)
+        {
+            Enemy enemy = col.GetComponent<Enemy>();
+            if (enemy != null)
+            {
+                enemy.Die();
+            }
+        }
+        
+        // Destroy barrel if enabled
+        if (destroyBarrelOnHit)
+        {
+            Destroy(gameObject, destroyDelay);
         }
     }
 }
