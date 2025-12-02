@@ -125,19 +125,19 @@ public class PlayerAbilities : MonoBehaviour
         // Pause player movement so it doesn't stack
         playerController.PauseMovement(true);
         
-        // Get dash direction (forward or input direction)
+        // Get dash direction from camera (where player is looking)
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
         
         if (Mathf.Abs(h) > 0.1f || Mathf.Abs(v) > 0.1f)
         {
-            // Dash in input direction
-            dashDirection = (transform.right * h + transform.forward * v).normalized;
+            // Dash in input direction relative to camera view
+            dashDirection = (playerCamera.transform.right * h + playerCamera.transform.forward * v).normalized;
         }
         else
         {
-            // Dash forward
-            dashDirection = transform.forward;
+            // Dash in camera forward direction
+            dashDirection = playerCamera.transform.forward;
         }
         
         // Spawn trail effect

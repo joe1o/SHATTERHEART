@@ -45,13 +45,53 @@ public class LevelTimer : MonoBehaviour
         {
             if (levelEndCollider.bounds.Contains(playerTransform.position))
             {
-                finished = true;
-                PlayerPrefs.SetFloat("Level1_Time", elapsed);
-                PlayerPrefs.Save();
-                Debug.Log($"Level Complete! Time: {elapsed:F2}s");
-                Invoke("LoadLevelComplete", 0.5f);
+                // Check if all enemies are dead
+                if (AllEnemiesDefeated())
+                {
+                    finished = true;
+                    PlayerPrefs.SetFloat("Level1_Time", elapsed);
+                    PlayerPrefs.Save();
+                    Debug.Log($"Level Complete! Time: {elapsed:F2}s");
+                    Invoke("LoadLevelComplete", 0.5f);
+                }
             }
         }
+    }
+    
+    bool AllEnemiesDefeated()
+    {
+        Enemy[] allEnemies = FindObjectsOfType<Enemy>();
+        
+        // Filter only enemies with "enemy" tag
+        System.Collections.Generic.List<Enemy> actualEnemies = new System.Collections.Generic.List<Enemy>();
+        foreach (Enemy enemy in allEnemies)
+        {
+            if (enemy.CompareTag("enemy"))
+            {
+                actualEnemies.Add(enemy);
+            }
+        }
+        
+        Debug.Log($"Actual enemies found: {actualEnemies.Count}");
+        
+        if (actualEnemies.Count == 0)
+        {
+            Debug.Log("No enemies in scene - level can be completed!");
+            return true;
+        }
+        
+        foreach (Enemy enemy in actualEnemies)
+        {
+            Debug.Log($"Enemy {enemy.name} - Dead: {enemy.IsDead()}");
+            if (!enemy.IsDead())
+            {
+                Debug.Log("Cannot complete level - enemies still alive!");
+                return false;
+            }
+        }
+        
+        Debug.Log("All enemies defeated!");
+        return true;
     }
     
     void LoadLevelComplete()

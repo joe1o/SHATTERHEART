@@ -15,6 +15,21 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 24b32ce121c2aa44594e58965dd47f27,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 24b32ce121c2aa44594e58965dd47f27,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 24b32ce121c2aa44594e58965dd47f27,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 24b32ce121c2aa44594e58965dd47f27,
+        type: 3}
       propertyPath: m_LocalPosition.x
       value: 13.15151
       objectReference: {fileID: 0}
@@ -409,6 +424,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: -8460703054946707925}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 24b32ce121c2aa44594e58965dd47f27,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5945648014682004646}
   m_SourcePrefab: {fileID: 100100000, guid: 24b32ce121c2aa44594e58965dd47f27, type: 3}
 --- !u!1 &961569439946787811 stripped
 GameObject:
@@ -477,3 +496,32 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5945648014682004646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 961569439946787811}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf008a9b5bb9c0a4ba67f6c1244f4dbf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fireRate: 2
+  damage: 1
+  range: 50
+  spreadAngle: 2
+  detectionRange: 40
+  fieldOfView: 60
+  bulletPrefab: {fileID: 0}
+  bulletParticleEffect: {fileID: 0}
+  bulletSpeed: 30
+  muzzleFlashPrefab: {fileID: 0}
+  hitEffectPrefab: {fileID: 0}
+  shootSound: {fileID: 0}
+  shootVolume: 0.6
+  firePoint: {fileID: 0}
+  playerAimHeight: 0.5
+  facePlayer: 1
+  rotationSpeed: 2

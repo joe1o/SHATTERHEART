@@ -659,7 +659,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 261270dc113d9874b9343e0cde3aa6b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bounceStrength: 15
+  bounceStrength: 20
   popVFX: {fileID: 0}
   popSound: {fileID: 8300000, guid: 3328b2396caea554c9146e3ffd4fcccd, type: 3}
   Volume: 0.145
