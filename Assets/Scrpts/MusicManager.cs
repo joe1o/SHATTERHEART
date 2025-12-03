@@ -57,9 +57,18 @@ public class MusicManager : MonoBehaviour
     
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (stopOnSceneChange && persistAcrossScenes)
+        if (persistAcrossScenes)
         {
-            Stop();
+            // Only continue music on these specific scenes
+            if (scene.name == "levels" || scene.name == "MainMenu" || scene.name == "CharacterSelect")
+            {
+                // Continue playing
+            }
+            else
+            {
+                // Stop music on all other scenes
+                Stop();
+            }
         }
     }
     
@@ -205,17 +214,20 @@ public class MusicManager : MonoBehaviour
     
     public void Pause()
     {
-        audioSource.Pause();
+        if (audioSource != null)
+            audioSource.Pause();
     }
     
     public void Resume()
     {
-        audioSource.UnPause();
+        if (audioSource != null)
+            audioSource.UnPause();
     }
     
     public void Stop()
     {
-        audioSource.Stop();
+        if (audioSource != null)
+            audioSource.Stop();
     }
     
     public void SetVolume(float volume)

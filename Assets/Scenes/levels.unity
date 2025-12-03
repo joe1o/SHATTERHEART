@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 739344385}
   - component: {fileID: 739344381}
   m_Layer: 5
-  m_Name: New Game
+  m_Name: EP2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -213,7 +213,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: CharacterSelect
+          m_StringArgument: Level2
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!222 &739344383
@@ -353,7 +353,7 @@ RectTransform:
   - {fileID: 739344380}
   - {fileID: 1394991072}
   - {fileID: 1110906620}
-  - {fileID: 1108541136}
+  - {fileID: 1044093912}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -373,7 +373,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5d93c32e4ffc9443be62b6c2e5beb6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1108541135
+--- !u!1 &1044093911
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -381,43 +381,43 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1108541136}
-  - component: {fileID: 1108541139}
-  - component: {fileID: 1108541138}
-  - component: {fileID: 1108541137}
+  - component: {fileID: 1044093912}
+  - component: {fileID: 1044093915}
+  - component: {fileID: 1044093914}
+  - component: {fileID: 1044093913}
   m_Layer: 5
-  m_Name: Exit
+  m_Name: back
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!224 &1108541136
+--- !u!224 &1044093912
 RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1108541135}
+  m_GameObject: {fileID: 1044093911}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.246875, y: 2.2565625, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 869008513}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.19175, y: 0.10166668}
-  m_AnchorMax: {x: 0.19175, y: 0.10166668}
-  m_AnchoredPosition: {x: -16.474976, y: -18}
-  m_SizeDelta: {x: 363.14, y: 39.7101}
+  m_AnchorMin: {x: 0.04133335, y: 0.102444455}
+  m_AnchorMax: {x: 0.04133335, y: 0.102444455}
+  m_AnchoredPosition: {x: 0, y: -33}
+  m_SizeDelta: {x: 353.33, y: 31.862}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1108541137
+--- !u!114 &1044093913
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1108541135}
+  m_GameObject: {fileID: 1044093911}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
@@ -451,29 +451,29 @@ MonoBehaviour:
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
   m_Interactable: 1
-  m_TargetGraphic: {fileID: 1108541138}
+  m_TargetGraphic: {fileID: 1044093914}
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 869008514}
         m_TargetAssemblyTypeName: MenuManager, Assembly-CSharp
-        m_MethodName: ExitGame
-        m_Mode: 1
+        m_MethodName: LoadScene
+        m_Mode: 5
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: MainMenu
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &1108541138
+--- !u!114 &1044093914
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1108541135}
+  m_GameObject: {fileID: 1044093911}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -497,13 +497,13 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!222 &1108541139
+--- !u!222 &1044093915
 CanvasRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1108541135}
+  m_GameObject: {fileID: 1044093911}
   m_CullTransparentMesh: 1
 --- !u!1 &1110906619
 GameObject:
@@ -518,7 +518,7 @@ GameObject:
   - component: {fileID: 1110906622}
   - component: {fileID: 1110906621}
   m_Layer: 5
-  m_Name: Levels
+  m_Name: EP3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -596,7 +596,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: levels
+          m_StringArgument: Level3
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1110906622
@@ -650,7 +650,7 @@ GameObject:
   - component: {fileID: 1394991074}
   - component: {fileID: 1394991073}
   m_Layer: 5
-  m_Name: Continue
+  m_Name: EP1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -665,14 +665,14 @@ RectTransform:
   m_GameObject: {fileID: 1394991071}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 0.64999, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 869008513}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.19175, y: 0.26188886}
-  m_AnchorMax: {x: 0.19175, y: 0.26188886}
-  m_AnchoredPosition: {x: -10.789185, y: -35.775085}
+  m_AnchorMin: {x: 0.187, y: 0.2312963}
+  m_AnchorMax: {x: 0.187, y: 0.2312963}
+  m_AnchoredPosition: {x: -1.7891846, y: -22}
   m_SizeDelta: {x: 374.5117, y: 71.5501}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1394991073
@@ -718,7 +718,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1394991074}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 869008514}
+        m_TargetAssemblyTypeName: MenuManager, Assembly-CSharp
+        m_MethodName: LoadScene
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Level1
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1394991074
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -906,7 +918,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 0bba029a1a8f6244e886bb17f498f2e4, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 480977fcf527a3c438020763cabe4669, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -933,7 +945,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1820852580}
-  - component: {fileID: 1820852579}
   m_Layer: 0
   m_Name: musicmanager
   m_TagString: Untagged
@@ -941,28 +952,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1820852579
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1820852578}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b73cb07749077d4db9741909d214b3e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  musicTracks:
-  - {fileID: 8300000, guid: bd84a512d2bbf7241b15bd6a35099fe1, type: 3}
-  musicVolume: 0.296
-  playOnStart: 1
-  shuffle: 0
-  loop: 0
-  persistAcrossScenes: 1
-  stopOnSceneChange: 0
-  fadeInDuration: 1
-  fadeOutDuration: 1
 --- !u!4 &1820852580
 Transform:
   m_ObjectHideFlags: 0
