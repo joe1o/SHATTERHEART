@@ -15,6 +15,7 @@ public class CardManager : MonoBehaviour
     public Sprite damnationSprite;
     public Sprite heartbreakerSprite;
     public Sprite anguishSprite;
+    public Sprite WintersBiteSprite;
     
     [Header("References")]
     public CardUI cardUI;
@@ -151,6 +152,7 @@ public class CardManager : MonoBehaviour
             case CardType.Damnation: return damnationSprite;
             case CardType.Heartbreaker: return heartbreakerSprite;
             case CardType.Anguish: return anguishSprite;
+            case CardType.WintersBite: return WintersBiteSprite;
             default: return null;
         }
     }
@@ -230,6 +232,9 @@ public class CardManager : MonoBehaviour
                 case CardType.Heartbreaker:
                 case CardType.Anguish:
                     shootingScript.SetWeapon(WeaponType.Katana);
+                    break;
+                case CardType.WintersBite:
+                    shootingScript.SetWeapon(WeaponType.Rifle);
                     break;
             }
         }
@@ -377,6 +382,10 @@ public class CardManager : MonoBehaviour
             case AbilityType.Stomp:
                 if (playerAbilities.CanStomp())
                     playerAbilities.StartStomp();
+                break;
+            case AbilityType.Fireball:
+                if (playerAbilities.CanFireball())
+                    playerAbilities.ActivateFireball();
                 break;
         }
     }

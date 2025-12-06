@@ -6,7 +6,8 @@ public enum CardType
     WidowMaker,     // Green - Machine Gun
     Damnation,      // Red - Shotgun
     Heartbreaker,   // White - Katana
-    Anguish         // Dark - Special
+    Anguish,         // Dark - Special
+    WintersBite
 }
 
 [System.Serializable]
@@ -99,6 +100,16 @@ public class Card
                 range = 50f;
                 discardAbility = AbilityType.Stomp;
                 break;
+
+            case CardType.WintersBite:
+                cardName = "WintersBite";
+                maxAmmo = 8;
+                ammo = 8;
+                damage = 3f;
+                fireRate = 2f;
+                range = 1000f;
+                discardAbility = AbilityType.Fireball;
+                break;
         }
     }
 }
@@ -108,6 +119,7 @@ public enum AbilityType
     None,
     Dash,
     Updraft,
-    Stomp
+    Stomp,
+    Fireball
 }
 

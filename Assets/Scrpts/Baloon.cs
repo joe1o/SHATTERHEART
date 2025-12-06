@@ -13,10 +13,12 @@ public class Baloon : MonoBehaviour
     [Range(0f, 1f)] public float Volume = 0.6f;
     private AudioSource audioSource;
     private PlayerAbilities abilities;
+    public float FBounce = 2;
 
     private void Start()
     {
         audioSource = GetComponent<AudioSource>();
+
         
     }
     private void OnTriggerEnter(Collider other)
@@ -31,7 +33,16 @@ public class Baloon : MonoBehaviour
 
             if (pm != null)
             {
-                pm.Bounce(bounceStrength);
+                // In your Balloon script, before applying the boost:
+
+                if (abilities != null && abilities.IsFireballing())
+                {
+                    pm.Bounce(FBounce);
+                }
+                else
+                {
+                    pm.Bounce(bounceStrength);
+                }
             }
 
             // Spawn pop effect if assigned

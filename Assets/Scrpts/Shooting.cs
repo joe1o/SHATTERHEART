@@ -5,7 +5,8 @@ public enum WeaponType
     Pistol,
     MachineGun,
     Shotgun,
-    Katana
+    Katana,
+    Rifle
 }
 
 public class Shooting : MonoBehaviour
@@ -24,7 +25,14 @@ public class Shooting : MonoBehaviour
     public float pistolFireRate = 4f;        // Shots per second
     public AudioClip pistolSound;
     [Range(0f, 1f)] public float pistolVolume = 0.7f;
-    
+
+    [Header("Rifle Settings")]
+    public float RifleDamage = 25f;
+    public float RifleRange = 100f;
+    public float RifleFireRate = 4f;        // Shots per second
+    public AudioClip RifleSound;
+    [Range(0f, 1f)] public float RifleVolume = 0.7f;
+
     [Header("Machine Gun Settings")]
     public float mgDamage = 10f;
     public float mgRange = 80f;
@@ -85,6 +93,7 @@ public class Shooting : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha2)) currentWeapon = WeaponType.MachineGun;
         if (Input.GetKeyDown(KeyCode.Alpha3)) currentWeapon = WeaponType.Shotgun;
         if (Input.GetKeyDown(KeyCode.Alpha4)) currentWeapon = WeaponType.Katana;
+        if (Input.GetKeyDown(KeyCode.Alpha5)) currentWeapon = WeaponType.Rifle;
     }
     
     void HandleShooting()
@@ -143,6 +152,9 @@ public class Shooting : MonoBehaviour
             case WeaponType.Katana:
                 SlashKatana();
                 break;
+            case WeaponType.Rifle:
+                FireRifle();
+                break;
         }
         if (CardManager.Instance != null && CardManager.Instance.cardUI != null)
         {
@@ -169,7 +181,27 @@ public class Shooting : MonoBehaviour
         PlaySound(pistolSound, pistolVolume);
         ApplyRecoil(0.05f);
     }
-    
+
+
+    void FireRifle()
+    {
+        // Consume ammo
+        if (CardManager.Instance != null)
+        {
+            CardManager.Instance.UseAmmo();
+        }
+
+        nextFireTime = Time.time + (1f / RifleFireRate);
+
+        Vector3 origin = playerCamera.transform.position;
+        Vector3 direction = playerCamera.transform.forward;
+
+        ShootRay(origin, direction, RifleRange, RifleDamage);
+
+        PlaySound(pistolSound, pistolVolume);
+        ApplyRecoil(0.05f);
+    }
+
     // ==================== MACHINE GUN ====================
     void FireMachineGun()
     {

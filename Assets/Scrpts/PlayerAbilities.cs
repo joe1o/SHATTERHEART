@@ -8,7 +8,28 @@ public class PlayerAbilities : MonoBehaviour
     public FirstPersonController playerController;
     public Camera playerCamera;
     public CharacterController characterController;
-    
+
+    [Header("Fireball Settings")]
+    public float fireballSpeed = 30f;
+    public float fireballDuration = 1.5f;
+    public float fireballMinSpeed = 5f;
+    public float fireballGroundDrag = 0.92f;
+    public float fireballAirDrag = 0.98f;
+    public float fireballSlopeFriction = 0.95f;
+    public bool fireballAllowAirControl = true;
+    public float fireballAirControlStrength = 2f;
+    public bool fireballAllowGroundControl = true;
+    public float fireballGroundControlStrength = 5f;
+    public bool fireballCanCancelEarly = true;
+    public ParticleSystem fireballParticles;
+    public TrailRenderer fireballTrail;
+    public AudioClip fireballLaunchSound;
+    [Range(0f, 1f)] public float fireballVolume = 0.8f;
+    private bool isFireballing = false;
+    private Vector3 fireballVelocity;
+    private float fireballTimer = 0f;
+
+
     [Header("Dash Settings")]
     public float dashDistance = 15f;
     public float dashDuration = 0.15f;
@@ -42,7 +63,8 @@ public class PlayerAbilities : MonoBehaviour
     public KeyCode dashKey = KeyCode.LeftShift;
     public KeyCode updraftKey = KeyCode.E;
     public KeyCode stompKey = KeyCode.Q;
-    
+    public KeyCode fireballKey = KeyCode.Z;
+
     // State tracking
     private bool canDash = true;
     private bool canUpdraft = true;
@@ -84,6 +106,11 @@ public class PlayerAbilities : MonoBehaviour
         {
             ProcessStomp();
         }
+        if (isFireballing)
+        {
+            ProcessFireball();
+        }
+
     }
     
     void HandleInput()
@@ -105,11 +132,157 @@ public class PlayerAbilities : MonoBehaviour
         {
             StartStomp();
         }
+
+        if (Input.GetKeyDown(fireballKey) && CanFireball())
+        {
+            ActivateFireball();
+        }
     }
+
+
+    public void ActivateFireball()
+    {
+        if (isFireballing) return;
+
+        // Cancel other abilities
+        if (isDashing) EndDash();
+        if (isStomping) isStomping = false;
+
+        isFireballing = true;
+        fireballTimer = fireballDuration;
+        // Reset vertical velocity to prevent falling momentum from affecting launch
+        playerController.SetVerticalVelocity(0f);
+
+        // Pause normal player movement
+        playerController.PauseMovement(true);
+
+        // Get launch direction from camera
+        Vector3 launchDir = playerCamera.transform.forward;
+
+        // Keep it mostly horizontal (optional - remove this for full 3D direction)
+        //launchDir.y = Mathf.Max(launchDir.y, -0.2f); // Allow slight downward angle
+        launchDir.Normalize();
+
+        // Set fireball velocity
+        fireballVelocity = launchDir * fireballSpeed;
+
+        // Visual effects
+        if (fireballParticles != null)
+            fireballParticles.Play();
+
+        if (fireballTrail != null)
+            fireballTrail.emitting = true;
+
+        // Speed lines effect
+        if (speedLinesEffect != null)
+            speedLinesEffect.StartEffect();
+
+        // Audio
+        PlaySound(fireballLaunchSound, fireballVolume);
+
+        Debug.Log("Fireball activated!");
+    }
+
+    void ProcessFireball()
+    {
+        fireballTimer -= Time.deltaTime;
+
+        // Check if should end fireball
+        if (fireballTimer <= 0f || fireballVelocity.magnitude < fireballMinSpeed)
+        {
+            EndFireball();
+            return;
+        }
+
+        // Optional: Cancel early with jump
+        if (fireballCanCancelEarly && Input.GetButtonDown("Jump"))
+        {
+            EndFireball();
+            return;
+        }
+
+        bool isGrounded = playerController.IsGrounded();
+
+        // Apply drag based on grounded state
+        float drag = isGrounded ? fireballGroundDrag : fireballAirDrag;
+        fireballVelocity *= drag;
+
+        // Apply additional slope friction if on slope
+        //if (isGrounded)
+        //{
+        //    RaycastHit hit;
+        //    if (Physics.Raycast(transform.position, Vector3.down, out hit, 2f))
+        //    {
+        //        float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+        //        if (slopeAngle > 5f) // On a slope
+        //        {
+        //            fireballVelocity *= fireballSlopeFriction;
+        //        }
+        //    }
+        //}
+
+        // Optional: Allow slight air control
+        if (fireballAllowAirControl && !isGrounded)
+        {
+            float h = Input.GetAxis("Horizontal");
+            float v = Input.GetAxis("Vertical");
+
+            if (Mathf.Abs(h) > 0.1f || Mathf.Abs(v) > 0.1f)
+            {
+                Vector3 inputDir = (playerCamera.transform.right * h + playerCamera.transform.forward * v).normalized;
+                fireballVelocity += inputDir * fireballAirControlStrength * Time.deltaTime;
+            }
+        }
+
+        // Apply gravity when in air
+        if (!isGrounded)
+        {
+            fireballVelocity += Physics.gravity * Time.deltaTime;
+        }
+
+        // Move character
+        characterController.Move(fireballVelocity * Time.deltaTime);
+
+        // Optional: Kill enemies in path
+        KillEnemiesInRadius(transform.position, dashDamageRadius);
+    }
+
+    void EndFireball()
+    {
+        if (!isFireballing) return;
+
+        isFireballing = false;
+
+        // Resume normal movement
+        playerController.PauseMovement(false);
+
+        // Transfer some momentum to normal movement (optional)
+        Vector3 remainingVelocity = fireballVelocity;
+        remainingVelocity.y = 0f; // Remove vertical component
+
+        // You can apply this to your player controller if it has a method for it
+        // playerController.AddVelocity(remainingVelocity * 0.3f);
+
+        // Visual effects
+        if (fireballParticles != null)
+            fireballParticles.Stop();
+
+        if (fireballTrail != null)
+            fireballTrail.emitting = false;
+
+        // Speed lines
+        if (speedLinesEffect != null)
+            speedLinesEffect.StopEffect();
+
+        Debug.Log("Fireball ended");
+    }
+
+
+
 
     // ==================== DASH ====================
 
-   
+
     public void StartDash()
     {
         
@@ -318,11 +491,14 @@ public class PlayerAbilities : MonoBehaviour
     }
     public bool IsDashing() => isDashing;
     public bool IsStomping() => isStomping;
-    
+
+    public bool IsFireballing() => isFireballing;
+
     public bool CanDash() => canDash;
     public bool CanUpdraft() => canUpdraft;
     public bool CanStomp() => canStomp && !playerController.IsGrounded();
-    
+    public bool CanFireball() => !isFireballing && !isDashing && !isStomping;
+
     // Reset abilities (useful for respawn)
     public void ResetAbilities()
     {
@@ -331,6 +507,7 @@ public class PlayerAbilities : MonoBehaviour
         canStomp = true;
         isDashing = false;
         isStomping = false;
+        isFireballing = false;
     }
 }
 
