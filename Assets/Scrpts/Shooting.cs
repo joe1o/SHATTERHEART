@@ -198,7 +198,7 @@ public class Shooting : MonoBehaviour
 
         ShootRay(origin, direction, RifleRange, RifleDamage);
 
-        PlaySound(pistolSound, pistolVolume);
+        PlaySound(RifleSound, RifleVolume);
         ApplyRecoil(0.05f);
     }
 

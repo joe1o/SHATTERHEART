@@ -112,8 +112,26 @@ public class FirstPersonController : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
-    
-    
+
+    public void AddVelocity(Vector3 addedVelocity)
+    {
+        // Horizontal only — leave vertical movement to your gravity/jump logic
+        addedVelocity.y = 0f;
+
+        // Combine with current velocity
+        velocity += addedVelocity;
+
+        // Optional clamp to avoid insane speeds
+        float maxSpeed = 30f;
+        Vector3 horizontal = new Vector3(velocity.x, 0f, velocity.z);
+
+        if (horizontal.magnitude > maxSpeed)
+        {
+            horizontal = horizontal.normalized * maxSpeed;
+            velocity = new Vector3(horizontal.x, velocity.y, horizontal.z);
+        }
+    }
+
     public bool isMoving()
     {
         return controller.velocity.magnitude > 0.1f;

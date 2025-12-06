@@ -203,35 +203,33 @@ public class PlayerAbilities : MonoBehaviour
 
         bool isGrounded = playerController.IsGrounded();
 
-        // Apply drag based on grounded state
-        float drag = isGrounded ? fireballGroundDrag : fireballAirDrag;
-        fireballVelocity *= drag;
+        // Get input for control
+        float h = Input.GetAxis("Horizontal");
+       // float v = Input.GetAxis("Vertical");
 
-        // Apply additional slope friction if on slope
-        //if (isGrounded)
-        //{
-        //    RaycastHit hit;
-        //    if (Physics.Raycast(transform.position, Vector3.down, out hit, 2f))
-        //    {
-        //        float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
-        //        if (slopeAngle > 5f) // On a slope
-        //        {
-        //            fireballVelocity *= fireballSlopeFriction;
-        //        }
-        //    }
-        //}
-
-        // Optional: Allow slight air control
-        if (fireballAllowAirControl && !isGrounded)
+        // Apply control based on grounded state
+        if (Mathf.Abs(h) > 0.1f) // || Mathf.Abs(v) > 0.1f)
         {
-            float h = Input.GetAxis("Horizontal");
-            float v = Input.GetAxis("Vertical");
+            Vector3 inputDir = (playerCamera.transform.right * h + playerCamera.transform.forward * 0).normalized;
 
-            if (Mathf.Abs(h) > 0.1f || Mathf.Abs(v) > 0.1f)
-            {
-                Vector3 inputDir = (playerCamera.transform.right * h + playerCamera.transform.forward * v).normalized;
-                fireballVelocity += inputDir * fireballAirControlStrength * Time.deltaTime;
-            }
+            // Current dash direction
+            Vector3 currentDir = fireballVelocity.normalized;
+
+            // Select turn rate
+            float turnRate = isGrounded ? fireballGroundControlStrength : fireballAirControlStrength;
+
+            // Rotate current direction toward input direction
+            Vector3 newDir = Vector3.RotateTowards(
+                currentDir,
+                inputDir,
+                turnRate * Time.deltaTime,
+                0f
+            );
+
+            // Reapply original speed (preserves magnitude!)
+            float speed = fireballVelocity.magnitude;
+            fireballVelocity = newDir * speed;
+
         }
 
         // Apply gravity when in air
@@ -240,28 +238,32 @@ public class PlayerAbilities : MonoBehaviour
             fireballVelocity += Physics.gravity * Time.deltaTime;
         }
 
-        // Move character
+        // Move character FIRST (before applying drag)
         characterController.Move(fireballVelocity * Time.deltaTime);
+
+        // THEN apply drag for next frame
+        float drag = isGrounded ? fireballGroundDrag : fireballAirDrag;
+        fireballVelocity *= drag;
 
         // Optional: Kill enemies in path
         KillEnemiesInRadius(transform.position, dashDamageRadius);
     }
 
-    void EndFireball()
+    public void EndFireball()
     {
         if (!isFireballing) return;
 
         isFireballing = false;
 
+        Vector3 horizontal = fireballVelocity;
+        //horizontal.y = 0f;
+        playerController.AddVelocity(horizontal);
+
+        // Vertical momentum (critical — fixes your instant drop)
+        playerController.SetVerticalVelocity(fireballVelocity.y);
+
         // Resume normal movement
         playerController.PauseMovement(false);
-
-        // Transfer some momentum to normal movement (optional)
-        Vector3 remainingVelocity = fireballVelocity;
-        remainingVelocity.y = 0f; // Remove vertical component
-
-        // You can apply this to your player controller if it has a method for it
-        // playerController.AddVelocity(remainingVelocity * 0.3f);
 
         // Visual effects
         if (fireballParticles != null)
@@ -306,6 +308,7 @@ public class PlayerAbilities : MonoBehaviour
         {
             // Dash in input direction relative to camera view
             dashDirection = (playerCamera.transform.right * h + playerCamera.transform.forward * v).normalized;
+            
         }
         else
         {
@@ -337,7 +340,7 @@ public class PlayerAbilities : MonoBehaviour
         // Calculate dash movement
         float dashSpeed = dashDistance / dashDuration;
         Vector3 dashMove = dashDirection * dashSpeed * Time.deltaTime;
-        //dashMove.y = 0f;
+        dashMove.y = 0f;
         
        
         // Move character
@@ -475,7 +478,7 @@ public class PlayerAbilities : MonoBehaviour
         }
     }
 
-    void PlaySound(AudioClip clip, float volume)
+    public void PlaySound(AudioClip clip, float volume)
     {
         if (clip != null && audioSource != null)
         {

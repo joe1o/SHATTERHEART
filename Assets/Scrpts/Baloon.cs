@@ -21,6 +21,8 @@ public class Baloon : MonoBehaviour
 
         
     }
+
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -37,12 +39,11 @@ public class Baloon : MonoBehaviour
 
                 if (abilities != null && abilities.IsFireballing())
                 {
-                    pm.Bounce(FBounce);
+                    abilities.EndFireball();
                 }
-                else
-                {
-                    pm.Bounce(bounceStrength);
-                }
+                
+                pm.Bounce(bounceStrength);
+                
             }
 
             // Spawn pop effect if assigned

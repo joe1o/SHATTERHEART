@@ -13,9 +13,19 @@ public class BarrelCollision : MonoBehaviour
     public float explosionRadius = 10f;
     public float explosionForce = 20f;
     public LayerMask enemyLayer;
-    
+    public AudioClip ExplosionSound;
+    [Range(0f, 1f)] public float Volume = 0.8f;
+
     private bool hasExploded = false;
-    
+    private AudioSource audioSource;
+
+
+    private void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+    }
+
+
     void OnTriggerEnter(Collider other)
     {
         // Check if collided with player
@@ -34,12 +44,26 @@ public class BarrelCollision : MonoBehaviour
             Explode(null);
         }
     }
-    
+    void PlayExplosionSound()
+    {
+        if (ExplosionSound == null) return;
+
+        GameObject soundGO = new GameObject("TempAudio");
+        soundGO.transform.position = transform.position;
+        AudioSource src = soundGO.AddComponent<AudioSource>();
+        src.clip = ExplosionSound;
+        src.volume = Volume;
+        src.Play();
+        Destroy(soundGO, ExplosionSound.length);
+    }
     void Explode(Transform playerTransform)
     {
         // Spawn particle effect at barrel position
+        PlayExplosionSound();
         if (explosionPrefab != null)
         {
+            
+          //  audioSource.PlayOneShot(ExplosionSound, Volume);
             Vector3 spawnPosition = transform.position;
             GameObject effect = Instantiate(explosionPrefab, spawnPosition, Quaternion.identity);
             
