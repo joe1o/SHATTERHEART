@@ -1,10 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PauseManager : MonoBehaviour
 {
     public static PauseManager Instance;
     
     [SerializeField] private GameObject pauseMenuUI;
+    [SerializeField] private Slider volumeSlider;
     private bool isPaused = false;
     
     void Awake()
@@ -38,6 +40,13 @@ public class PauseManager : MonoBehaviour
         }
         Debug.Log("Pause menu UI found: " + pauseMenuUI.name);
         pauseMenuUI.SetActive(false);
+        
+        // Setup volume slider
+        LoadVolume();
+        if (volumeSlider != null)
+        {
+            volumeSlider.onValueChanged.AddListener(SetVolume);
+        }
     }
     
     void Update()
@@ -89,5 +98,23 @@ public class PauseManager : MonoBehaviour
     public bool IsPaused()
     {
         return isPaused;
+    }
+    
+    public void SetVolume(float volume)
+    {
+        AudioListener.volume = volume;
+        PlayerPrefs.SetFloat("MasterVolume", volume);
+        PlayerPrefs.Save();
+    }
+    
+    void LoadVolume()
+    {
+        float savedVolume = PlayerPrefs.GetFloat("MasterVolume", 1f);
+        AudioListener.volume = savedVolume;
+        
+        if (volumeSlider != null)
+        {
+            volumeSlider.value = savedVolume;
+        }
     }
 }
