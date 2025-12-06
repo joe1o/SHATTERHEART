@@ -260,7 +260,7 @@ public class PlayerAbilities : MonoBehaviour
         playerController.AddVelocity(horizontal);
 
         // Vertical momentum (critical — fixes your instant drop)
-        playerController.SetVerticalVelocity(fireballVelocity.y);
+        playerController.SetVerticalVelocity(0);
 
         // Resume normal movement
         playerController.PauseMovement(false);

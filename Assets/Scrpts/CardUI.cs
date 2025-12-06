@@ -219,11 +219,13 @@ public class CardUI : MonoBehaviour
         List<Vector2> currentEndPositions = new List<Vector2>();
         List<Vector3> currentStartScales = new List<Vector3>();
         List<Vector3> currentEndScales = new List<Vector3>();
+        List<Sprite> currentSprites = new List<Sprite>(); // STORE SPRITES
 
         List<Vector2> otherStartPositions = new List<Vector2>();
         List<Vector2> otherEndPositions = new List<Vector2>();
         List<Vector3> otherStartScales = new List<Vector3>();
         List<Vector3> otherEndScales = new List<Vector3>();
+        List<Sprite> otherSprites = new List<Sprite>(); // STORE SPRITES
 
         // Target scales
         float currentToSecondaryRatio = secondaryCardSize.x / currentCardSize.x;
@@ -235,17 +237,14 @@ public class CardUI : MonoBehaviour
             CardDisplay cd = currentCards[i];
             currentStartPositions.Add(cd.rectTransform.anchoredPosition);
             currentStartScales.Add(cd.rectTransform.localScale);
-            
+            currentSprites.Add(cd.image.sprite); // SAVE THE SPRITE
 
-            // Find corresponding target position in otherCards
-            if (i < otherCards.Count)
-            {
-                currentEndPositions.Add(otherCards[i].targetPosition);
-            }
-            else
-            {
-                currentEndPositions.Add(otherCards[0].targetPosition);
-            }
+            // Calculate end position manually based on secondary card layout
+            // Secondary cards are positioned to the LEFT of current position
+            int secondaryPosition = 1; // Assuming it becomes the first secondary
+            float xPos = currentCardPosition.x + (secondaryCardOffsetX * secondaryPosition) + (i * secondaryStackOffsetX);
+            float yPos = currentCardPosition.y + secondaryCardOffsetY + (i * secondaryStackOffsetY);
+            currentEndPositions.Add(new Vector2(xPos, yPos));
 
             currentEndScales.Add(cd.rectTransform.localScale * currentToSecondaryRatio);
         }
@@ -256,24 +255,19 @@ public class CardUI : MonoBehaviour
             CardDisplay cd = otherCards[i];
             otherStartPositions.Add(cd.rectTransform.anchoredPosition);
             otherStartScales.Add(cd.rectTransform.localScale);
-            
+            otherSprites.Add(cd.image.sprite); // SAVE THE SPRITE
 
-            // Find corresponding target position in currentCards
-            if (i < currentCards.Count)
-            {
-                otherEndPositions.Add(currentCards[i].targetPosition);
-            }
-            else
-            {
-                otherEndPositions.Add(currentCards[0].targetPosition);
-            }
+            // Calculate end position manually based on current card layout
+            float xPos = currentCardPosition.x + (i * currentStackOffsetX);
+            float yPos = currentCardPosition.y + (i * currentStackOffsetY);
+            otherEndPositions.Add(new Vector2(xPos, yPos));
 
             otherEndScales.Add(cd.rectTransform.localScale * secondaryToCurrentRatio);
         }
 
         float duration = 0.2f;
         float elapsed = 0f;
-        float radius = 0f;
+        float radius = 0f; // Re-add radius for circular effect
 
         while (elapsed < duration)
         {
@@ -292,26 +286,31 @@ public class CardUI : MonoBehaviour
             {
                 CardDisplay cd = currentCards[i];
 
+                // LOCK THE SPRITE during animation
+                if (cd.image != null)
+                    cd.image.sprite = currentSprites[i];
+
                 cd.rectTransform.anchoredPosition =
                     Vector2.Lerp(currentStartPositions[i], currentEndPositions[i], easeT) +
                     new Vector2(xOffset, -yOffset);
 
                 cd.rectTransform.localScale = Vector3.Lerp(currentStartScales[i], currentEndScales[i], easeT);
-
             }
 
             // Animate ALL other cards coming to current
             for (int i = 0; i < otherCards.Count; i++)
             {
                 CardDisplay cd = otherCards[i];
-                bool isTopCard = (i == otherCards.Count - 1);
+
+                // LOCK THE SPRITE during animation
+                if (cd.image != null)
+                    cd.image.sprite = otherSprites[i];
 
                 cd.rectTransform.anchoredPosition =
                     Vector2.Lerp(otherStartPositions[i], otherEndPositions[i], easeT) +
                     new Vector2(xOffset, yOffset);
 
                 cd.rectTransform.localScale = Vector3.Lerp(otherStartScales[i], otherEndScales[i], easeT);
-
             }
 
             yield return null;
@@ -322,7 +321,7 @@ public class CardUI : MonoBehaviour
         RebuildCards(
             CardManager.Instance.GetAllStacks(),
             CardManager.Instance.GetCurrentStackIndex()
-            
+             // Don't animate slide-in
         );
 
         isAnimatingSwap = false;
