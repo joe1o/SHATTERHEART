@@ -63,15 +63,10 @@ public class CardManager : MonoBehaviour
     
     void HandleInput()
     {
-        // Switch cards with scroll wheel
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll > 0f)
+        // Switch cards with Q key
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             SwitchToNextStack();
-        }
-        else if (scroll < 0f)
-        {
-            SwitchToPreviousStack();
         }
         
         // Discard card with right click
@@ -79,12 +74,6 @@ public class CardManager : MonoBehaviour
         {
             DiscardCurrentCard();
         }
-        
-        // Number keys to switch stacks
-        if (Input.GetKeyDown(KeyCode.Alpha1) && cardStacks.Count > 0)
-            SwitchToStack(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2) && cardStacks.Count > 1)
-            SwitchToStack(1);
     }
     
     public bool CanPickupCard(CardType type)
@@ -123,12 +112,9 @@ public class CardManager : MonoBehaviour
             List<Card> newStack = new List<Card> { newCard };
             cardStacks.Add(newStack);
             
-            // Auto-switch to new card if it's our first
-            if (cardStacks.Count == 1)
-            {
-                currentStackIndex = 0;
-                ApplyCurrentCard();
-            }
+            // Switch to newly picked card
+            currentStackIndex = cardStacks.Count - 1;
+            ApplyCurrentCard();
         }
         
         PlaySound(pickupSound);

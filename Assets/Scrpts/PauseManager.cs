@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class PauseManager : MonoBehaviour
 {
@@ -80,7 +81,13 @@ public class PauseManager : MonoBehaviour
         pauseMenuUI.SetActive(false);
         Debug.Log("Game resumed");
         
-        // Lock cursor
+        // Lock cursor with a slight delay to ensure it takes effect
+        StartCoroutine(LockCursorDelayed());
+    }
+    
+    IEnumerator LockCursorDelayed()
+    {
+        yield return null; // Wait one frame
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }

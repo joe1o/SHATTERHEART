@@ -8,7 +8,7 @@ public class LevelCompleteUI : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private Image gradeImage;
-    [SerializeField] private string levelName = "Level1";
+    private string levelName;
     
     [Header("Grade Times (in seconds)")]
     [SerializeField] private float sGradeTime = 45f;    // S grade: under 45 seconds
@@ -24,6 +24,9 @@ public class LevelCompleteUI : MonoBehaviour
     
     void Start()
     {
+        // Get the level name from PlayerPrefs (set by LevelTimer)
+        levelName = PlayerPrefs.GetString("CurrentLevel", "Level1");
+        
         if (timerText == null)
             timerText = FindObjectOfType<TextMeshProUGUI>();
         

@@ -55,6 +55,8 @@ public class FirstPersonController : MonoBehaviour
     private float lastGroundedTime;
     private float lastJumpPressTime;
     private float nextFootstepTime;
+    private float lastLandSoundTime;
+    private float timeLeftGround = 0f;
     private AudioSource audioSource;
     private bool movementPaused = false;
 
@@ -115,7 +117,7 @@ public class FirstPersonController : MonoBehaviour
 
     public void AddVelocity(Vector3 addedVelocity)
     {
-        // Horizontal only — leave vertical movement to your gravity/jump logic
+        // Horizontal only ï¿½ leave vertical movement to your gravity/jump logic
         addedVelocity.y = 0f;
 
         // Combine with current velocity
@@ -372,15 +374,27 @@ public class FirstPersonController : MonoBehaviour
     
     void HandleLanding()
     {
-        // Play land sound when hitting ground
+        // Track when we leave the ground
+        if (!isGrounded && wasGrounded)
+        {
+            timeLeftGround = Time.time;
+        }
+        
+        // Only play landing sound if we were in air for at least 0.1 seconds
+        // This prevents ground check flicker from triggering the sound
         if (isGrounded && !wasGrounded)
         {
-            AudioClip clipToPlay = isInWater ? waterLandSound : landSound;
-            float volume = isInWater ? waterLandVolume : landVolume;
+            float airTime = Time.time - timeLeftGround;
             
-            if (clipToPlay != null && audioSource != null)
+            if (airTime > 0.1f) // Must be in air for at least 0.1 seconds
             {
-                audioSource.PlayOneShot(clipToPlay, volume);
+                AudioClip clipToPlay = isInWater ? waterLandSound : landSound;
+                float volume = isInWater ? waterLandVolume : landVolume;
+                
+                if (clipToPlay != null && audioSource != null)
+                {
+                    audioSource.PlayOneShot(clipToPlay, volume);
+                }
             }
         }
     }

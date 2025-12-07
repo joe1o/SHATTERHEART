@@ -64,8 +64,15 @@ public class CharacterSpriteReaction : MonoBehaviour
     {
         if (playerTransform == null || characterSprite == null) return;
 
-        // Calculate player velocity
-        Vector3 playerVelocity = (playerTransform.position - lastPlayerPosition) / Time.deltaTime;
+        // Skip updates when paused (timeScale is 0)
+        if (Time.timeScale == 0) return;
+
+        // Calculate player velocity (protect against zero deltaTime)
+        Vector3 playerVelocity = Vector3.zero;
+        if (Time.deltaTime > 0)
+        {
+            playerVelocity = (playerTransform.position - lastPlayerPosition) / Time.deltaTime;
+        }
         lastPlayerPosition = playerTransform.position;
 
         if (playerController != null)

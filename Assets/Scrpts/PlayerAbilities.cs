@@ -62,7 +62,7 @@ public class PlayerAbilities : MonoBehaviour
     [Header("Input Keys")]
     public KeyCode dashKey = KeyCode.LeftShift;
     public KeyCode updraftKey = KeyCode.E;
-    public KeyCode stompKey = KeyCode.Q;
+    public KeyCode stompKey = KeyCode.B;
     public KeyCode fireballKey = KeyCode.Z;
 
     // State tracking
@@ -127,11 +127,7 @@ public class PlayerAbilities : MonoBehaviour
             PerformUpdraft();
         }
         
-        // Stomp - downward slam (only in air)
-        if (Input.GetKeyDown(stompKey) && canStomp && !playerController.IsGrounded())
-        {
-            StartStomp();
-        }
+
 
         if (Input.GetKeyDown(fireballKey) && CanFireball())
         {
@@ -259,7 +255,7 @@ public class PlayerAbilities : MonoBehaviour
         //horizontal.y = 0f;
         playerController.AddVelocity(horizontal);
 
-        // Vertical momentum (critical — fixes your instant drop)
+        // Vertical momentum (critical ï¿½ fixes your instant drop)
         playerController.SetVerticalVelocity(0);
 
         // Resume normal movement

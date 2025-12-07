@@ -228,7 +228,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timerText: {fileID: 1248874210}
   gradeImage: {fileID: 116159826}
-  levelName: Level1
   sGradeTime: 45
   aGradeTime: 60
   bGradeTime: 90
@@ -1479,8 +1478,8 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1188601626}
         m_TargetAssemblyTypeName: MenuManager, Assembly-CSharp
-        m_MethodName: LoadScene
-        m_Mode: 5
+        m_MethodName: NextLevel
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine

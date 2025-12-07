@@ -11,9 +11,22 @@ public class LevelTimer : MonoBehaviour
     [SerializeField] private Collider levelEndCollider;
     [SerializeField] private Transform playerTransform;
     
+    private string currentLevelName;
+    
     void Start()
     {
         startTime = Time.time;
+        
+        // Get current scene name
+        currentLevelName = SceneManager.GetActiveScene().name;
+        PlayerPrefs.SetString("CurrentLevel", currentLevelName);
+        
+        // Save as last level played (for Continue button)
+        if (currentLevelName.StartsWith("Level"))
+        {
+            PlayerPrefs.SetString("LastLevelPlayed", currentLevelName);
+            PlayerPrefs.Save();
+        }
         
         if (timerText == null)
             timerText = FindObjectOfType<TextMeshProUGUI>();
@@ -45,11 +58,11 @@ public class LevelTimer : MonoBehaviour
         {
             if (levelEndCollider.bounds.Contains(playerTransform.position))
             {
-                // Check if all enemies are dead
-                if (AllEnemiesDefeated())
+                // Check if all enemies and balloons are destroyed
+                if (AllEnemiesDefeated() && AllBalloonsDestroyed())
                 {
                     finished = true;
-                    PlayerPrefs.SetFloat("Level1_Time", elapsed);
+                    PlayerPrefs.SetFloat($"{currentLevelName}_Time", elapsed);
                     PlayerPrefs.Save();
                     Debug.Log($"Level Complete! Time: {elapsed:F2}s");
                     Invoke("LoadLevelComplete", 0.5f);
@@ -92,6 +105,22 @@ public class LevelTimer : MonoBehaviour
         
         Debug.Log("All enemies defeated!");
         return true;
+    }
+    
+    bool AllBalloonsDestroyed()
+    {
+        GameObject[] allBalloons = GameObject.FindGameObjectsWithTag("Baloon");
+        
+        Debug.Log($"Balloons found: {allBalloons.Length}");
+        
+        if (allBalloons.Length == 0)
+        {
+            Debug.Log("All balloons destroyed!");
+            return true;
+        }
+        
+        Debug.Log("Cannot complete level - balloons still exist!");
+        return false;
     }
     
     void LoadLevelComplete()
