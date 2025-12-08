@@ -62,9 +62,20 @@ public class LevelTimer : MonoBehaviour
                 if (AllEnemiesDefeated() && AllBalloonsDestroyed())
                 {
                     finished = true;
-                    PlayerPrefs.SetFloat($"{currentLevelName}_Time", elapsed);
-                    PlayerPrefs.Save();
-                    Debug.Log($"Level Complete! Time: {elapsed:F2}s");
+                    
+                    // Only save if it's a new best time (or first time)
+                    float currentBest = PlayerPrefs.GetFloat($"{currentLevelName}_Time", float.MaxValue);
+                    if (elapsed < currentBest)
+                    {
+                        PlayerPrefs.SetFloat($"{currentLevelName}_Time", elapsed);
+                        PlayerPrefs.Save();
+                        Debug.Log($"New Best Time! {elapsed:F2}s");
+                    }
+                    else
+                    {
+                        Debug.Log($"Level Complete! Time: {elapsed:F2}s (Best: {currentBest:F2}s)");
+                    }
+                    
                     Invoke("LoadLevelComplete", 0.5f);
                 }
             }
