@@ -42,7 +42,6 @@ The core loop is: **move fast → collect cards → eliminate enemies → reach 
 | Reaper's Kiss | Precision | Pistol |
 | Widow Maker | Rapid Fire | SMG |
 | Damnation | Burst | Shotgun |
-| Winter's Bite | — | — |
 
 ---
 
