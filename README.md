@@ -16,6 +16,8 @@ The core loop is: **move fast → collect cards → eliminate enemies → reach 
 - Explosive barrels and balloon platforms reward creative traversal
 - Levels can't be completed until all enemies are eliminated
 
+![Gameplay](gameplay.gif)
+
 ---
 
 ## Controls
